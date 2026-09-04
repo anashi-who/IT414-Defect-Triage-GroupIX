@@ -1,0 +1,441 @@
+<title>Staff Portal</title>
+<style>
+  :root{
+    --paper:#f6f7f3; --surface:#ffffff; --surface-2:#eef2ec;
+    --ink:#152018; --ink-soft:#333c35; --ink-faint:#5b665e;
+    --line:#dde3da; --line-strong:#c4cec0;
+    --brand-900:#064e3b; --brand-800:#065f46; --brand-700:#047857;
+    --brand-600:#059669; --brand-500:#10b981; --brand-100:#d1fae5; --brand-50:#ecfdf5;
+    --mark-accent:#ffffff;
+    --danger:#a4342b; --danger-bg:#fbeceb;
+    --warn:#8a5a00;   --warn-bg:#fdf3df;
+    --success:#1f6b45; --success-bg:#e6f3ea;
+    --info:#1c5f8a;   --info-bg:#e7f1f8;
+    --neutral:#50595f; --neutral-bg:#eef1f0;
+    --shadow-lg:0 24px 48px -28px rgba(12,33,23,.38);
+    --shadow-md:0 12px 28px -16px rgba(12,33,23,.28);
+    --radius-lg:22px; --radius-md:14px; --radius-sm:9px;
+    --font-display:'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+    --font-body:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0a130e; --surface:#101c15; --surface-2:#152219;
+      --ink:#edf3ee; --ink-soft:#a9b8ae; --ink-faint:#7c8c81;
+      --line:#213228; --line-strong:#2c4032;
+      --brand-100:#152c1e; --brand-50:#101c15;
+      --danger-bg:#2d1613; --warn-bg:#2c2210; --success-bg:#12291b;
+      --info-bg:#122631; --neutral-bg:#1a221e;
+      --shadow-lg:0 24px 48px -28px rgba(0,0,0,.6); --shadow-md:0 12px 28px -16px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0a130e; --surface:#101c15; --surface-2:#152219;
+    --ink:#edf3ee; --ink-soft:#a9b8ae; --ink-faint:#7c8c81;
+    --line:#213228; --line-strong:#2c4032;
+    --brand-100:#152c1e; --brand-50:#101c15;
+    --danger-bg:#2d1613; --warn-bg:#2c2210; --success-bg:#12291b;
+    --info-bg:#122631; --neutral-bg:#1a221e;
+    --shadow-lg:0 24px 48px -28px rgba(0,0,0,.6); --shadow-md:0 12px 28px -16px rgba(0,0,0,.5);
+  }
+  *{ box-sizing:border-box; }
+  html{ color-scheme:light dark; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,h4{ font-family:var(--font-display); font-weight:600; margin:0; color:var(--ink); }
+  p{ margin:0; }
+  a{ color:inherit; }
+  button{ font-family:inherit; }
+  svg{ display:block; }
+  *:focus-visible{ outline:3px solid var(--brand-500); outline-offset:3px; border-radius:4px; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; transition-duration:.001ms !important; } }
+  .icon{ flex-shrink:0; } .icon svg{ width:100%; height:100%; }
+  #app{ min-height:100vh; display:flex; flex-direction:column; }
+  .wrap{ width:100%; max-width:1180px; margin:0 auto; padding:0 32px; }
+  @media (max-width:720px){ .wrap{ padding:0 18px; } }
+
+  .site-header{ position:sticky; top:0; z-index:40; background:var(--brand-900); border-bottom:1px solid var(--brand-800); }
+  .site-header .wrap{ display:flex; align-items:center; justify-content:space-between; min-height:84px; padding-top:12px; padding-bottom:12px; gap:16px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; cursor:pointer; background:none; border:none; padding:0; }
+  .brand-mark{ width:40px; height:40px; }
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:20px; color:#fff; display:block; }
+  .portal-tag{ display:block; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#8fd8ae; margin-top:2px; }
+  .header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .role-tag{ display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#eafff3; background:rgba(255,255,255,.14); padding:9px 14px; border-radius:999px; white-space:nowrap; }
+
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:var(--font-body); font-weight:700; font-size:14.5px; cursor:pointer; border-radius:999px; border:1.5px solid transparent; padding:11px 20px; text-decoration:none; }
+  .btn-primary{ background:var(--brand-700); color:#fff; box-shadow:var(--shadow-md); }
+  .btn-primary:hover{ background:var(--brand-600); }
+  .btn-ghost{ background:transparent; color:#eafff3; border-color:rgba(255,255,255,.35); }
+  .btn-ghost:hover{ background:rgba(255,255,255,.1); }
+
+  .login-shell{ flex:1; display:flex; align-items:center; justify-content:center; padding:60px 20px;
+    background:radial-gradient(ellipse 900px 500px at 90% -10%, rgba(63,174,116,.35), transparent 60%), linear-gradient(160deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-600) 100%); }
+  .login-card{ max-width:420px; width:100%; background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:38px 36px; }
+  .login-card h2{ font-size:22px; margin-bottom:6px; }
+  .login-card > p{ color:var(--ink-soft); font-size:13.5px; margin-bottom:22px; }
+  .field{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+  .field label{ font-size:13px; font-weight:700; }
+  .field input, .field select{ font-family:inherit; font-size:14.5px; padding:12px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+  .field input:focus, .field select:focus{ border-color:var(--brand-500); box-shadow:0 0 0 3px var(--brand-100); outline:none; }
+  .field-error{ font-size:12.5px; color:var(--danger); }
+  .login-note{ font-size:12px; color:var(--ink-faint); background:var(--surface-2); border-radius:var(--radius-sm); padding:10px 12px; margin-top:16px; }
+
+  .admin-shell{ flex:1; background:var(--paper); }
+  .admin-top{ background:var(--surface); border-bottom:1px solid var(--line); padding:26px 0; }
+  .admin-top h1{ font-size:24px; }
+  .admin-top p{ color:var(--ink-soft); font-size:13.5px; margin-top:4px; }
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:26px 0; }
+  @media (max-width:800px){ .stat-row{ grid-template-columns:repeat(2,1fr); } }
+  .stat-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px 20px; }
+  .stat-card .num{ font-family:var(--font-mono); font-size:26px; font-weight:600; }
+  .stat-card .lbl{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+  .dash-tabs{ display:flex; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:4px; width:fit-content; margin-bottom:22px; }
+  .dash-tabs button{ border:none; background:none; padding:9px 18px; border-radius:999px; font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; gap:7px; }
+  .dash-tabs button.active{ background:var(--brand-700); color:#fff; }
+  .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+  .seg{ display:flex; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:4px; }
+  .seg button{ border:none; background:none; padding:8px 15px; border-radius:999px; font-size:13px; font-weight:600; color:var(--ink-soft); cursor:pointer; }
+  .seg button.active{ background:var(--brand-700); color:#fff; }
+  .toolbar select{ font-family:inherit; font-size:13px; padding:9px 12px; border-radius:var(--radius-sm); border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+  .table-wrap{ overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); margin-bottom:60px; }
+  table{ width:100%; border-collapse:collapse; min-width:920px; }
+  thead th{ text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); padding:13px 16px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  tbody td{ padding:13px 16px; font-size:13.5px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--surface-2); }
+  .mono{ font-family:var(--font-mono); }
+  .badge{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; white-space:nowrap; }
+  .badge.green{ background:var(--success-bg); color:var(--success); }
+  .badge.amber{ background:var(--warn-bg); color:var(--warn); }
+  .badge.red{ background:var(--danger-bg); color:var(--danger); }
+  .badge.blue{ background:var(--info-bg); color:var(--info); }
+  .badge.slate{ background:var(--neutral-bg); color:var(--neutral); }
+  .icon-btn{ background:none; border:1.5px solid var(--line-strong); border-radius:var(--radius-sm); padding:6px 10px; font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:var(--ink); }
+  .icon-btn:hover{ background:var(--surface-2); }
+  .empty-state{ padding:60px 20px; text-align:center; color:var(--ink-faint); font-size:13.5px; }
+  .panel-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:20px 22px; margin-bottom:20px; }
+  .panel-card h3{ font-size:15px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .announcement-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px 18px; margin-bottom:12px; }
+  .announcement-card h4{ font-size:14.5px; margin-bottom:4px; }
+  .announcement-card .ac-meta{ font-size:11.5px; color:var(--ink-faint); margin-bottom:8px; }
+  .announcement-card p{ font-size:13.5px; color:var(--ink-soft); }
+
+  .review-card{ background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px 20px; }
+  .review-row{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .review-row:last-child{ border-bottom:none; }
+  .review-row .k{ color:var(--ink-soft); }
+  .review-row .v{ font-weight:600; text-align:right; }
+  .check-banner{ display:flex; align-items:center; gap:12px; border-radius:var(--radius-md); padding:14px 18px; margin-bottom:18px; font-size:13.5px; font-weight:600; }
+  .check-banner.ok{ background:var(--success-bg); color:var(--success); }
+  .check-banner.bad{ background:var(--warn-bg); color:var(--warn); }
+  .checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+  .checklist li{ display:flex; align-items:center; gap:10px; font-size:13.5px; }
+  .checklist .dot{ width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .checklist .dot.yes{ background:var(--success-bg); color:var(--success); }
+  .checklist .dot.no{ background:var(--warn-bg); color:var(--warn); }
+  .checklist .dot.flag{ background:var(--danger-bg); color:var(--danger); }
+  .timeline{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+  .timeline li{ display:flex; gap:10px; align-items:flex-start; font-size:13px; }
+  .timeline .t-dot{ width:9px; height:9px; border-radius:50%; background:var(--brand-500); margin-top:6px; flex-shrink:0; }
+  .timeline .t-status{ font-weight:700; }
+  .timeline .t-when{ color:var(--ink-faint); font-size:11.5px; font-family:var(--font-mono); }
+  .sms-item{ background:var(--surface-2); border-radius:var(--radius-sm); padding:10px 12px; font-size:12.5px; margin-bottom:8px; }
+  .sms-item .sms-when{ color:var(--ink-faint); font-size:11px; font-family:var(--font-mono); margin-top:4px; }
+  .modal-section-title{ font-size:13px; font-weight:700; margin:20px 0 10px; display:flex; align-items:center; gap:7px; }
+
+  .action-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+  .action-btn{ border:1.5px solid var(--line-strong); background:var(--surface); border-radius:var(--radius-sm); padding:9px 14px; font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink); }
+  .action-btn.primary{ background:var(--brand-700); border-color:var(--brand-700); color:#fff; }
+  .action-btn.danger{ background:var(--danger-bg); border-color:transparent; color:var(--danger); }
+  .action-btn.info{ background:var(--info-bg); border-color:transparent; color:var(--info); }
+  .action-btn[disabled]{ opacity:.45; cursor:default; }
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(10,19,14,.55); display:flex; align-items:center; justify-content:center; padding:24px; z-index:100; }
+  .modal{ max-width:600px; width:100%; max-height:88vh; overflow-y:auto; background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:30px 32px; }
+  .modal-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; gap:12px; }
+  .modal-head h3{ font-size:19px; }
+  .modal-close{ background:var(--surface-2); border:none; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft); flex-shrink:0; }
+  .fade-in{ animation:fadeIn .25s ease both; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* This is the STAFF-ONLY internal portal — a separate file from the
+   public client site and from the Admin/Department Head portals. It has
+   its own login (one seeded Assessor's Staff account) and reads/writes
+   the SAME 'smartAssessRequests' key the client file uses, so if you ever
+   host both on the same origin they'd share live data; as separately
+   published Artifacts they run on different origins with independent
+   storage, so this file's request list is its own seeded demo copy. */
+
+function svg(inner){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>'; }
+const ICONS = {
+  doc: svg('<rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>'),
+  swap: svg('<line x1="4" y1="8" x2="20" y2="8"/><polyline points="15 3 20 8 15 13"/><line x1="20" y1="16" x2="4" y2="16"/><polyline points="9 11 4 16 9 21"/>'),
+  check: svg('<polyline points="5 13 10 18 19 6"/>'),
+  alert: svg('<path d="M12 3 22 20H2z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none"/>'),
+  x: svg('<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>'),
+  login: svg('<path d="M13 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/><polyline points="10 8 15 12 10 16"/><line x1="15" y1="12" x2="3" y2="12"/>'),
+  logout: svg('<path d="M11 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/><polyline points="14 16 19 12 14 8"/><line x1="19" y1="12" x2="7" y2="12"/>'),
+  grid: svg('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),
+  bell: svg('<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/>'),
+  eye: svg('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+  checklistIcon: svg('<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><polyline points="9 13 11 15 15 11"/>'),
+  timer: svg('<circle cx="12" cy="13" r="8"/><line x1="12" y1="13" x2="12" y2="9"/><line x1="12" y1="13" x2="15" y2="14.5"/>'),
+  sms: svg('<path d="M4 4h16v12H8l-4 4V4z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="11" x2="13" y2="11"/>'),
+};
+function ic(name, size){ return '<span class="icon" style="width:'+(size||'17px')+';height:'+(size||'17px')+'">'+ICONS[name]+'</span>'; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmtDate(iso){ try{ return new Date(iso).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }catch(e){ return iso; } }
+function fmtDateTime(iso){ try{ return new Date(iso).toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ return iso; } }
+
+function storeGet(key, fallback){ try{ const v = localStorage.getItem(key); return v==null ? fallback : JSON.parse(v); }catch(e){ return fallback; } }
+function storeSet(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+function loadRequests(){ return storeGet('smartAssessRequests', []); }
+function saveRequests(list){ storeSet('smartAssessRequests', list); }
+function loadAnnouncements(){ return storeGet('smartAssessAnnouncements', []); }
+
+const STATUS_FLOW = ['Received','Processing','Approved','Rejected','Out for Release'];
+const STATUS_BADGE = { Received:'slate', Processing:'amber', Approved:'green', Rejected:'red', 'Out for Release':'blue' };
+const SMS_TEXT = {
+  Received: function(id){ return "SMART ASSESS: Your request "+id+" has been received by the Mabini Assessor's Office."; },
+  Processing: function(id){ return 'SMART ASSESS: Your request '+id+' is now under review.'; },
+  Approved: function(id){ return 'SMART ASSESS: Good news! Your request '+id+' has been approved.'; },
+  Rejected: function(id, missing){ return 'SMART ASSESS: Your request '+id+' needs corrections. Missing/invalid: '+((missing&&missing.length)?missing.join(', '):'see portal for details')+'.'; },
+  'Out for Release': function(id){ return 'SMART ASSESS: Your document for request '+id+' is ready for release at the MAO.'; }
+};
+const UPLOAD_META = {
+  docreq:{ ownerId:'Valid Government-Issued ID', requesterId:'Valid ID of Requester', authLetter:'Authorization Letter' },
+  landtransfer:{ ownerId:'Valid ID of Property Owner', requesterId:'Valid ID of Requester', authLetter:'Authorization Letter' },
+};
+const LAND_TRANSFER_DOCS = [
+  { key:'ctcTdOrTitle', label:'Certified True Copy of Tax Declaration or Title' },
+  { key:'notarialDeed', label:'Notarial Deed of Sale or Donation' },
+  { key:'vicinityMap', label:'Vicinity Map' },
+  { key:'certNoImprovement', label:'Certification of No Improvement' },
+  { key:'taxClearance', label:'Tax Clearance' }
+];
+
+function requiredIdKeys(isOwner){ return isOwner ? ['ownerId'] : ['ownerId','requesterId','authLetter']; }
+function requirementChecklist(rec){
+  const items = [];
+  if(rec.flow==='landtransfer'){
+    LAND_TRANSFER_DOCS.forEach(function(d){
+      const f = rec.files && rec.files[d.key];
+      items.push({ label:d.label, status: !f?'missing':(f.valid?'ok':'flagged') });
+    });
+  }
+  requiredIdKeys(rec.isOwner).forEach(function(k){
+    const f = rec.files && rec.files[k];
+    items.push({ label:UPLOAD_META[rec.flow][k], status: !f?'missing':(f.valid?'ok':'flagged') });
+  });
+  return items;
+}
+
+function seedIfEmpty(){
+  if(!storeGet('smartAssessStaffAccount', null)){
+    storeSet('smartAssessStaffAccount', { name:'Jessica P. Villanueva', username:'jessica.staff', password:'Passw0rd!' });
+  }
+  if(!loadRequests().length){
+    const mk = function(o){ return Object.assign({ email:'', barangay:'', files:{}, timestamps:{}, smsLog:[] }, o); };
+    const seed = [
+      mk({ id:'DR-2026-00001', flow:'docreq', applicant:'Ramon C. Villareal', contact:'0917-224-5510', email:'r.villareal@example.com', barangay:'Poblacion', docType:'Certified True Copy of Tax Declaration (CTC-TD)', purpose:'For Titling', arp:'024-01-0032', propertyAddress:'Brgy. Poblacion, Mabini, Batangas', isOwner:true, files:{ ownerId:{name:'villareal_id.jpg', size:184320, valid:true} }, status:'Approved' }),
+      mk({ id:'DR-2026-00002', flow:'docreq', applicant:'Josefina M. Dimaano', contact:'0928-771-2093', email:'j.dimaano@example.com', barangay:'Bagalangit', docType:'Certification of No/With Existing Improvement', purpose:'For Building Permit', arp:'024-03-1187', propertyAddress:'Brgy. Bagalangit, Mabini, Batangas', isOwner:false, files:{ ownerId:{name:'owner_id.jpg', size:150210, valid:true} }, status:'Rejected' }),
+      mk({ id:'LT-2026-00001', flow:'landtransfer', applicant:'Antonio L. Reyes', contact:'0939-402-8815', email:'a.reyes@example.com', barangay:'Solo', docType:'Sale', purpose:'For Transfer', arp:'024-02-0765', propertyAddress:'Brgy. Solo, Mabini, Batangas', isOwner:true, files:{ ownerId:{name:'reyes_owner_id.pdf', size:98230, valid:true}, ctcTdOrTitle:{name:'ctc_td.pdf', size:220100, valid:true}, notarialDeed:{name:'deed_of_sale.pdf', size:301200, valid:true}, vicinityMap:{name:'vicinity_map.jpg', size:411000, valid:true}, certNoImprovement:{name:'no_improvement.pdf', size:120400, valid:true}, taxClearance:{name:'tax_clearance.pdf', size:98700, valid:true} }, status:'Processing' }),
+      mk({ id:'DR-2026-00003', flow:'docreq', applicant:'Corazon B. Manalo', contact:'0905-118-4471', email:'c.manalo@example.com', barangay:'Sto. Tomas', docType:'Certification of No Liens and Encumbrances', purpose:'Personal Copy', arp:'024-05-2290', propertyAddress:'Brgy. Sto. Tomas, Mabini, Batangas', isOwner:true, files:{}, status:'Received' }),
+      mk({ id:'LT-2026-00002', flow:'landtransfer', applicant:'Bienvenido S. Cruz', contact:'0918-330-2244', email:'b.cruz@example.com', barangay:'Poblacion', docType:'Inheritance', purpose:'For Titling', arp:'024-04-0518', propertyAddress:'Brgy. Poblacion, Mabini, Batangas', isOwner:true, files:{ ownerId:{name:'cruz_id.jpg', size:110000, valid:true}, ctcTdOrTitle:{name:'title.pdf', size:200000, valid:true} }, status:'Received' })
+    ];
+    seed.forEach(function(r){
+      const status = r.status; delete r.status;
+      const cl = requirementChecklist(r);
+      r.requirementComplete = cl.every(function(c){ return c.status==='ok'; });
+      r.missing = cl.filter(function(c){ return c.status!=='ok'; }).map(function(c){ return c.label; });
+      const at = new Date().toISOString();
+      r.timestamps[status] = at;
+      r.smsLog.push({ status:status, body:SMS_TEXT[status](r.id, r.missing), at:at });
+      r.status = status;
+    });
+    saveRequests(seed);
+  }
+  if(!loadAnnouncements().length){
+    storeSet('smartAssessAnnouncements', [
+      { id:1, title:'Office schedule for Rizal Day', body:'The MAO will be closed on December 30. Document release for approved requests will resume the next business day.', author:'Rodel H. Ortega', date:new Date(Date.now()-3*864e5).toISOString() },
+      { id:2, title:'Reminder: verify scanned uploads', body:'Please confirm scans are legible before approving. Blurry or cropped IDs should be flagged for resubmission.', author:'Rodel H. Ortega', date:new Date(Date.now()-1*864e5).toISOString() }
+    ]);
+  }
+}
+
+const state = { loggedIn:false, staffName:'', tab:'requests', filter:'all', statusFilter:'', modalId:null, loginError:'' };
+
+function brandMark(){
+  return '<svg class="brand-mark" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--brand-700)"/><circle cx="20" cy="20" r="18" fill="none" stroke="var(--mark-accent)" stroke-width="1.4"/><circle cx="20" cy="20" r="13" fill="none" stroke="var(--mark-accent)" stroke-width="1"/><path d="M20 11l2.3 5.2 5.7.5-4.3 3.8 1.3 5.6-4.9-3-4.9 3 1.3-5.6-4.3-3.8 5.7-.5z" fill="var(--mark-accent)"/></svg>';
+}
+function statusBadge(status){ return '<span class="badge '+(STATUS_BADGE[status]||'slate')+'">'+esc(status)+'</span>'; }
+function checkBadge(rec){ return rec.requirementComplete ? '<span class="badge green">'+ic('check','12px')+' Complete</span>' : '<span class="badge amber">'+ic('alert','12px')+' '+rec.missing.length+' issue(s)</span>'; }
+
+function renderHeader(){
+  const right = state.loggedIn
+    ? '<span class="role-tag">'+ic('grid','14px')+" Assessor's Staff &middot; "+esc(state.staffName)+'</span><button class="btn btn-ghost" data-action="logout">'+ic('logout')+' Log Out</button>'
+    : '';
+  return '<header class="site-header"><div class="wrap">'
+    + '<div class="brand">'+brandMark()+'<span><span class="brand-name">Mabini Assessor Office</span><span class="portal-tag">Staff Portal</span></span></div>'
+    + '<div class="header-actions">'+right+'</div>'
+    + '</div></header>';
+}
+
+function renderLogin(){
+  const acct = storeGet('smartAssessStaffAccount', {});
+  return renderHeader()
+  + '<div class="login-shell"><div class="login-card fade-in">'
+    + '<h2>Assessor\'s Staff Log In</h2><p>Internal portal for reviewing document and land transfer requests.</p>'
+    + '<div class="field"><label>Username</label><input id="lg-user" type="text" placeholder="'+esc(acct.username||'')+'"></div>'
+    + '<div class="field"><label>Password</label><input id="lg-pass" type="password"></div>'
+    + (state.loginError ? '<div class="field-error" style="margin-bottom:12px">'+esc(state.loginError)+'</div>' : '')
+    + '<button class="btn btn-primary" style="width:100%" data-action="do-login">'+ic('login')+' Log In</button>'
+    + '<div class="login-note">Demo account: <span class="mono">'+esc(acct.username||'')+'</span> &middot; password <strong>'+esc(acct.password||'')+'</strong></div>'
+  + '</div></div>';
+}
+
+function timelineHtml(rec){
+  const entries = STATUS_FLOW.filter(function(s){ return rec.timestamps && rec.timestamps[s]; }).map(function(s){ return {status:s, at:rec.timestamps[s]}; }).sort(function(a,b){ return new Date(a.at)-new Date(b.at); });
+  return '<ul class="timeline">'+entries.map(function(e){ return '<li><span class="t-dot"></span><div><div class="t-status">'+esc(e.status)+'</div><div class="t-when">'+fmtDateTime(e.at)+'</div></div></li>'; }).join('')+'</ul>';
+}
+function smsLogHtml(rec){
+  if(!rec.smsLog || !rec.smsLog.length) return '<p style="font-size:12.5px;color:var(--ink-faint)">No messages sent yet.</p>';
+  return rec.smsLog.slice().reverse().map(function(m){ return '<div class="sms-item">'+esc(m.body)+'<div class="sms-when">'+fmtDateTime(m.at)+'</div></div>'; }).join('');
+}
+
+function renderRequestsTable(list){
+  if(!list.length) return '<div class="empty-state">No requests match this filter.</div>';
+  const rows = list.map(function(r){
+    return '<tr><td class="mono">'+esc(r.id)+'</td><td>'+esc(r.applicant)+'</td>'
+      + '<td>'+(r.flow==='docreq'?'Document Request':'Land Transfer')+'</td><td>'+esc(r.docType)+'</td><td>'+esc(r.barangay||'—')+'</td>'
+      + '<td>'+checkBadge(r)+'</td><td>'+statusBadge(r.status)+'</td>'
+      + '<td><button class="icon-btn" data-view-detail="'+esc(r.id)+'">'+ic('eye','14px')+' View</button></td></tr>';
+  }).join('');
+  return '<table><thead><tr><th>Reference No.</th><th>Applicant</th><th>Service</th><th>Type</th><th>Barangay</th><th>AI Check</th><th>Status</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function renderDetailModal(rec){
+  if(!rec) return '';
+  const items = requirementChecklist(rec);
+  const checklistHtml = items.map(function(i){
+    const cls = i.status==='ok'?'yes':(i.status==='flagged'?'flag':'no');
+    return '<li><span class="dot '+cls+'">'+ic(i.status==='ok'?'check':'alert','11px')+'</span>'+esc(i.label)+(i.status==='ok'?'':(i.status==='flagged'?' — invalid format':' — missing'))+'</li>';
+  }).join('');
+  const actions = STATUS_FLOW.filter(function(s){ return s!=='Received'; }).map(function(s){
+    const cls = s==='Approved'?'primary':(s==='Rejected'?'danger':(s==='Out for Release'?'info':''));
+    return '<button class="action-btn '+cls+'" '+(rec.status===s?'disabled':'')+' data-set-status="'+s+'" data-set-status-id="'+esc(rec.id)+'">Mark '+s+'</button>';
+  }).join('');
+  return '<div class="modal-overlay" data-close-modal="1"><div class="modal" onclick="event.stopPropagation()">'
+    + '<div class="modal-head"><div><h3>'+esc(rec.id)+'</h3><p style="color:var(--ink-soft);font-size:13px;margin-top:2px">'+esc(rec.applicant)+'</p></div><button class="modal-close" data-close-modal="1">'+ic('x','15px')+'</button></div>'
+    + statusBadge(rec.status)+' '+checkBadge(rec)
+    + '<div class="review-card" style="margin:16px 0">'
+      + '<div class="review-row"><span class="k">Service</span><span class="v">'+(rec.flow==='docreq'?'Document Request':'Land Transfer')+'</span></div>'
+      + '<div class="review-row"><span class="k">Type</span><span class="v">'+esc(rec.docType)+'</span></div>'
+      + '<div class="review-row"><span class="k">Purpose</span><span class="v">'+esc(rec.purpose)+'</span></div>'
+      + '<div class="review-row"><span class="k">ARP / Tax Decl. No.</span><span class="v">'+esc(rec.arp)+'</span></div>'
+      + '<div class="review-row"><span class="k">Property Address</span><span class="v">'+esc(rec.propertyAddress)+'</span></div>'
+      + '<div class="review-row"><span class="k">Contact</span><span class="v">'+esc(rec.contact)+'</span></div>'
+      + '<div class="review-row"><span class="k">Ownership</span><span class="v">'+(rec.isOwner?'Registered owner':'Filed on behalf of owner')+'</span></div>'
+    + '</div>'
+    + '<div class="modal-section-title">'+ic('checklistIcon','15px')+' AI Rule-Based Requirement Checklist</div><ul class="checklist">'+checklistHtml+'</ul>'
+    + (rec.advisory ? '<div class="check-banner bad" style="margin-top:16px">'+ic('alert')+'<span>'+esc(rec.advisory)+'</span></div>' : '')
+    + '<div class="modal-section-title">'+ic('timer','15px')+' Time Stamp Tracking</div>'+timelineHtml(rec)
+    + '<div class="modal-section-title">'+ic('sms','15px')+' SMS Log (simulated)</div>'+smsLogHtml(rec)
+    + '<div class="modal-section-title">'+ic('grid','15px')+' Staff Actions</div><div class="action-row">'+actions+'</div>'
+  + '</div></div>';
+}
+
+function renderDashboard(){
+  const all = loadRequests();
+  const total = all.length, received = all.filter(function(r){return r.status==='Received';}).length,
+    processing = all.filter(function(r){return r.status==='Processing';}).length,
+    flagged = all.filter(function(r){return !r.requirementComplete;}).length;
+  let list = all;
+  if(state.filter!=='all') list = list.filter(function(r){ return r.flow===state.filter; });
+  if(state.statusFilter) list = list.filter(function(r){ return r.status===state.statusFilter; });
+  const announcements = loadAnnouncements();
+
+  const tabs = '<div class="dash-tabs">'
+    + '<button class="'+(state.tab==='requests'?'active':'')+'" data-tab="requests">'+ic('doc','14px')+' Requests</button>'
+    + '<button class="'+(state.tab==='announcements'?'active':'')+'" data-tab="announcements">'+ic('bell','14px')+' Announcements</button>'
+    + '</div>';
+  let body;
+  if(state.tab==='announcements'){
+    body = announcements.length ? announcements.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);}).map(function(a){
+      return '<div class="announcement-card"><h4>'+esc(a.title)+'</h4><div class="ac-meta">'+esc(a.author)+' &middot; '+fmtDateTime(a.date)+'</div><p>'+esc(a.body)+'</p></div>';
+    }).join('') : '<div class="empty-state">No announcements yet.</div>';
+  } else {
+    body = '<div class="toolbar">'
+      + '<div class="seg"><button class="'+(state.filter==='all'?'active':'')+'" data-filter="all">All</button>'
+      + '<button class="'+(state.filter==='docreq'?'active':'')+'" data-filter="docreq">Document Request</button>'
+      + '<button class="'+(state.filter==='landtransfer'?'active':'')+'" data-filter="landtransfer">Land Transfer</button></div>'
+      + '<select id="status-filter"><option value="">All statuses</option>'
+      + STATUS_FLOW.map(function(s){ return '<option value="'+s+'" '+(state.statusFilter===s?'selected':'')+'>'+s+'</option>'; }).join('')
+      + '</select></div>'
+      + '<div class="table-wrap">'+renderRequestsTable(list)+'</div>';
+  }
+  return renderHeader() + '<div class="admin-shell">'
+    + '<div class="admin-top"><div class="wrap"><h1>Assessor\'s Staff Dashboard</h1><p>Review requests, confirm the AI rule-based checker\'s results, and update processing status.</p></div></div>'
+    + '<div class="wrap"><div class="stat-row">'
+      + '<div class="stat-card"><div class="num">'+total+'</div><div class="lbl">Total Requests</div></div>'
+      + '<div class="stat-card"><div class="num">'+received+'</div><div class="lbl">Newly Received</div></div>'
+      + '<div class="stat-card"><div class="num">'+processing+'</div><div class="lbl">Processing</div></div>'
+      + '<div class="stat-card"><div class="num">'+flagged+'</div><div class="lbl">Flagged by AI Checker</div></div>'
+      + '</div>' + tabs + body + '</div></div>'
+    + (state.modalId ? renderDetailModal(all.find(function(r){return r.id===state.modalId;})) : '');
+}
+
+function render(){
+  document.getElementById('app').innerHTML = state.loggedIn ? renderDashboard() : renderLogin();
+  bindEvents();
+}
+function bindEvents(){
+  const root = document.getElementById('app');
+  root.querySelectorAll('[data-action]').forEach(function(el){
+    el.addEventListener('click', function(){
+      const a = el.getAttribute('data-action');
+      if(a==='logout'){ state.loggedIn=false; state.staffName=''; render(); }
+      else if(a==='do-login'){
+        const u = (document.getElementById('lg-user').value||'').trim();
+        const p = (document.getElementById('lg-pass').value||'').trim();
+        const acct = storeGet('smartAssessStaffAccount', {});
+        if(u===acct.username && p===acct.password){ state.loggedIn=true; state.staffName=acct.name; state.loginError=''; }
+        else state.loginError = 'Incorrect username or password.';
+        render();
+      }
+    });
+  });
+  root.querySelectorAll('[data-tab]').forEach(function(el){ el.addEventListener('click', function(){ state.tab=el.getAttribute('data-tab'); render(); }); });
+  root.querySelectorAll('[data-filter]').forEach(function(el){ el.addEventListener('click', function(){ state.filter=el.getAttribute('data-filter'); render(); }); });
+  const sf = root.querySelector('#status-filter');
+  if(sf) sf.addEventListener('change', function(){ state.statusFilter = sf.value; render(); });
+  root.querySelectorAll('[data-view-detail]').forEach(function(el){ el.addEventListener('click', function(){ state.modalId = el.getAttribute('data-view-detail'); render(); }); });
+  root.querySelectorAll('[data-close-modal]').forEach(function(el){ el.addEventListener('click', function(){ state.modalId = null; render(); }); });
+  root.querySelectorAll('[data-set-status]').forEach(function(el){
+    el.addEventListener('click', function(){
+      const id = el.getAttribute('data-set-status-id'), status = el.getAttribute('data-set-status');
+      const list = loadRequests(); const rec = list.find(function(r){ return r.id===id; });
+      if(rec){
+        rec.status = status; rec.timestamps = rec.timestamps||{}; rec.smsLog = rec.smsLog||[];
+        const at = new Date().toISOString();
+        rec.timestamps[status] = at;
+        rec.smsLog.push({ status:status, body:SMS_TEXT[status](rec.id, rec.missing), at:at });
+        saveRequests(list);
+      }
+      render();
+    });
+  });
+}
+
+seedIfEmpty();
+render();
+})();
+</script>

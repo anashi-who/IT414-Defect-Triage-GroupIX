@@ -1,0 +1,295 @@
+<title>Department Head Portal</title>
+<style>
+  :root{
+    --paper:#f6f7f3; --surface:#ffffff; --surface-2:#eef2ec;
+    --ink:#152018; --ink-soft:#333c35; --ink-faint:#5b665e;
+    --line:#dde3da; --line-strong:#c4cec0;
+    --brand-900:#064e3b; --brand-800:#065f46; --brand-700:#047857;
+    --brand-600:#059669; --brand-500:#10b981; --brand-100:#d1fae5; --brand-50:#ecfdf5;
+    --mark-accent:#ffffff;
+    --danger:#a4342b; --danger-bg:#fbeceb;
+    --warn:#8a5a00;   --warn-bg:#fdf3df;
+    --success:#1f6b45; --success-bg:#e6f3ea;
+    --info:#1c5f8a;   --info-bg:#e7f1f8;
+    --neutral:#50595f; --neutral-bg:#eef1f0;
+    --shadow-lg:0 24px 48px -28px rgba(12,33,23,.38);
+    --shadow-md:0 12px 28px -16px rgba(12,33,23,.28);
+    --radius-lg:22px; --radius-md:14px; --radius-sm:9px;
+    --font-display:'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+    --font-body:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0a130e; --surface:#101c15; --surface-2:#152219;
+      --ink:#edf3ee; --ink-soft:#a9b8ae; --ink-faint:#7c8c81;
+      --line:#213228; --line-strong:#2c4032;
+      --brand-100:#152c1e; --brand-50:#101c15;
+      --danger-bg:#2d1613; --warn-bg:#2c2210; --success-bg:#12291b;
+      --info-bg:#122631; --neutral-bg:#1a221e;
+      --shadow-lg:0 24px 48px -28px rgba(0,0,0,.6); --shadow-md:0 12px 28px -16px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0a130e; --surface:#101c15; --surface-2:#152219;
+    --ink:#edf3ee; --ink-soft:#a9b8ae; --ink-faint:#7c8c81;
+    --line:#213228; --line-strong:#2c4032;
+    --brand-100:#152c1e; --brand-50:#101c15;
+    --danger-bg:#2d1613; --warn-bg:#2c2210; --success-bg:#12291b;
+    --info-bg:#122631; --neutral-bg:#1a221e;
+    --shadow-lg:0 24px 48px -28px rgba(0,0,0,.6); --shadow-md:0 12px 28px -16px rgba(0,0,0,.5);
+  }
+  *{ box-sizing:border-box; }
+  html{ color-scheme:light dark; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,h4{ font-family:var(--font-display); font-weight:600; margin:0; color:var(--ink); }
+  p{ margin:0; }
+  a{ color:inherit; }
+  button{ font-family:inherit; }
+  svg{ display:block; }
+  *:focus-visible{ outline:3px solid var(--brand-500); outline-offset:3px; border-radius:4px; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; transition-duration:.001ms !important; } }
+  .icon{ flex-shrink:0; } .icon svg{ width:100%; height:100%; }
+  #app{ min-height:100vh; display:flex; flex-direction:column; }
+  .wrap{ width:100%; max-width:1180px; margin:0 auto; padding:0 32px; }
+  @media (max-width:720px){ .wrap{ padding:0 18px; } }
+
+  .site-header{ position:sticky; top:0; z-index:40; background:var(--brand-900); border-bottom:1px solid var(--brand-800); }
+  .site-header .wrap{ display:flex; align-items:center; justify-content:space-between; min-height:84px; padding-top:12px; padding-bottom:12px; gap:16px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ width:40px; height:40px; }
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:20px; color:#fff; display:block; }
+  .portal-tag{ display:block; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#8fd8ae; margin-top:2px; }
+  .header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .role-tag{ display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#eafff3; background:rgba(255,255,255,.14); padding:9px 14px; border-radius:999px; white-space:nowrap; }
+
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:var(--font-body); font-weight:700; font-size:14.5px; cursor:pointer; border-radius:999px; border:1.5px solid transparent; padding:11px 20px; text-decoration:none; }
+  .btn-primary{ background:var(--brand-700); color:#fff; box-shadow:var(--shadow-md); }
+  .btn-primary:hover{ background:var(--brand-600); }
+  .btn-ghost{ background:transparent; color:#eafff3; border-color:rgba(255,255,255,.35); }
+  .btn-ghost:hover{ background:rgba(255,255,255,.1); }
+
+  .login-shell{ flex:1; display:flex; align-items:center; justify-content:center; padding:60px 20px;
+    background:radial-gradient(ellipse 900px 500px at 90% -10%, rgba(63,174,116,.35), transparent 60%), linear-gradient(160deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-600) 100%); }
+  .login-card{ max-width:420px; width:100%; background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:38px 36px; }
+  .login-card h2{ font-size:22px; margin-bottom:6px; }
+  .login-card > p{ color:var(--ink-soft); font-size:13.5px; margin-bottom:22px; }
+  .field{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+  .field label{ font-size:13px; font-weight:700; }
+  .field input, .field textarea{ font-family:inherit; font-size:14.5px; padding:12px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+  .field input:focus, .field textarea:focus{ border-color:var(--brand-500); box-shadow:0 0 0 3px var(--brand-100); outline:none; }
+  .field-error{ font-size:12.5px; color:var(--danger); }
+  .login-note{ font-size:12px; color:var(--ink-faint); background:var(--surface-2); border-radius:var(--radius-sm); padding:10px 12px; margin-top:16px; }
+
+  .admin-shell{ flex:1; background:var(--paper); }
+  .admin-top{ background:var(--surface); border-bottom:1px solid var(--line); padding:26px 0; }
+  .admin-top h1{ font-size:24px; }
+  .admin-top p{ color:var(--ink-soft); font-size:13.5px; margin-top:4px; }
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:26px 0; }
+  @media (max-width:800px){ .stat-row{ grid-template-columns:repeat(2,1fr); } }
+  .stat-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px 20px; }
+  .stat-card .num{ font-family:var(--font-mono); font-size:26px; font-weight:600; }
+  .stat-card .lbl{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+  .dash-tabs{ display:flex; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:4px; width:fit-content; margin-bottom:22px; }
+  .dash-tabs button{ border:none; background:none; padding:9px 18px; border-radius:999px; font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; gap:7px; }
+  .dash-tabs button.active{ background:var(--brand-700); color:#fff; }
+  .badge{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; white-space:nowrap; }
+  .badge.green{ background:var(--success-bg); color:var(--success); }
+  .badge.amber{ background:var(--warn-bg); color:var(--warn); }
+  .badge.red{ background:var(--danger-bg); color:var(--danger); }
+  .badge.blue{ background:var(--info-bg); color:var(--info); }
+  .badge.slate{ background:var(--neutral-bg); color:var(--neutral); }
+  .mono{ font-family:var(--font-mono); }
+  .empty-state{ padding:60px 20px; text-align:center; color:var(--ink-faint); font-size:13.5px; }
+  .panel-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:20px 22px; margin-bottom:20px; }
+  .panel-card h3{ font-size:15px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .status-legend{ display:flex; gap:8px; flex-wrap:wrap; }
+  .bar-row{ display:grid; grid-template-columns:150px 1fr 42px; gap:10px; align-items:center; font-size:13px; margin-bottom:11px; }
+  .bar-track{ height:10px; background:var(--surface-2); border-radius:999px; overflow:hidden; }
+  .bar-fill{ height:100%; background:var(--brand-500); border-radius:999px; }
+  .bar-count{ font-family:var(--font-mono); text-align:right; color:var(--ink-soft); }
+  .review-row{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .review-row:last-child{ border-bottom:none; }
+  .review-row .k{ color:var(--ink-soft); }
+  .announcement-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px 18px; margin-bottom:12px; }
+  .announcement-card h4{ font-size:14.5px; margin-bottom:4px; }
+  .announcement-card .ac-meta{ font-size:11.5px; color:var(--ink-faint); margin-bottom:8px; }
+  .announcement-card p{ font-size:13.5px; color:var(--ink-soft); }
+  .compose-form{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px 20px; margin-bottom:24px; display:flex; flex-direction:column; gap:12px; }
+  .flash{ border-radius:var(--radius-sm); padding:12px 16px; margin-bottom:18px; font-size:13.5px; background:var(--success-bg); color:var(--success); }
+  .fade-in{ animation:fadeIn .25s ease both; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* DEPARTMENT-HEAD-ONLY internal portal — separate file/origin from the
+   client site and from the Staff / Admin portals. One seeded Dept. Head account. */
+
+function svg(inner){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>'; }
+const ICONS = {
+  bar: svg('<line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="19" y1="20" x2="19" y2="15"/>'),
+  bell: svg('<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/>'),
+  send: svg('<line x1="21" y1="3" x2="10" y2="14"/><polygon points="21 3 14 21 10 14 3 10 21 3"/>'),
+  login: svg('<path d="M13 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/><polyline points="10 8 15 12 10 16"/><line x1="15" y1="12" x2="3" y2="12"/>'),
+  logout: svg('<path d="M11 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/><polyline points="14 16 19 12 14 8"/><line x1="19" y1="12" x2="7" y2="12"/>'),
+  checklistIcon: svg('<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><polyline points="9 13 11 15 15 11"/>'),
+  pin: svg('<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/>'),
+  clock: svg('<circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="14"/>'),
+};
+function ic(name, size){ return '<span class="icon" style="width:'+(size||'17px')+';height:'+(size||'17px')+'">'+ICONS[name]+'</span>'; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmtDateTime(iso){ try{ return new Date(iso).toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ return iso; } }
+function storeGet(key, fallback){ try{ const v = localStorage.getItem(key); return v==null ? fallback : JSON.parse(v); }catch(e){ return fallback; } }
+function storeSet(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+function loadRequests(){ return storeGet('smartAssessRequests', []); }
+function loadAnnouncements(){ return storeGet('smartAssessAnnouncements', []); }
+function saveAnnouncements(list){ storeSet('smartAssessAnnouncements', list); }
+
+const STATUS_FLOW = ['Received','Processing','Approved','Rejected','Out for Release'];
+const STATUS_BADGE = { Received:'slate', Processing:'amber', Approved:'green', Rejected:'red', 'Out for Release':'blue' };
+function statusBadge(s){ return '<span class="badge '+(STATUS_BADGE[s]||'slate')+'">'+esc(s)+'</span>'; }
+
+function seedIfEmpty(){
+  if(!storeGet('smartAssessHeadAccount', null)){
+    storeSet('smartAssessHeadAccount', { name:'Rodel H. Ortega', username:'rodel.head', password:'Passw0rd!' });
+  }
+  if(!loadRequests().length){
+    const mk = function(o){ return Object.assign({ files:{}, timestamps:{}, smsLog:[] }, o); };
+    const seed = [
+      mk({ id:'DR-2026-00001', flow:'docreq', applicant:'Ramon C. Villareal', barangay:'Poblacion', docType:'Certified True Copy of Tax Declaration (CTC-TD)', requirementComplete:true, status:'Approved' }),
+      mk({ id:'DR-2026-00002', flow:'docreq', applicant:'Josefina M. Dimaano', barangay:'Bagalangit', docType:'Certification of No/With Existing Improvement', requirementComplete:false, status:'Rejected' }),
+      mk({ id:'LT-2026-00001', flow:'landtransfer', applicant:'Antonio L. Reyes', barangay:'Solo', docType:'Sale', requirementComplete:true, status:'Processing' }),
+      mk({ id:'DR-2026-00003', flow:'docreq', applicant:'Corazon B. Manalo', barangay:'Sto. Tomas', docType:'Certification of No Liens and Encumbrances', requirementComplete:false, status:'Received' }),
+      mk({ id:'LT-2026-00002', flow:'landtransfer', applicant:'Bienvenido S. Cruz', barangay:'Poblacion', docType:'Inheritance', requirementComplete:false, status:'Received' })
+    ];
+    storeSet('smartAssessRequests', seed);
+  }
+  if(!loadAnnouncements().length){
+    saveAnnouncements([
+      { id:1, title:'Office schedule for Rizal Day', body:'The MAO will be closed on December 30. Document release for approved requests will resume the next business day.', author:'Rodel H. Ortega', date:new Date(Date.now()-3*864e5).toISOString() },
+      { id:2, title:'Reminder: verify scanned uploads', body:'Please confirm scans are legible before approving. Blurry or cropped IDs should be flagged for resubmission.', author:'Rodel H. Ortega', date:new Date(Date.now()-1*864e5).toISOString() }
+    ]);
+  }
+}
+
+const state = { loggedIn:false, headName:'', tab:'reports', loginError:'' };
+
+function brandMark(){
+  return '<svg class="brand-mark" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--brand-700)"/><circle cx="20" cy="20" r="18" fill="none" stroke="var(--mark-accent)" stroke-width="1.4"/><circle cx="20" cy="20" r="13" fill="none" stroke="var(--mark-accent)" stroke-width="1"/><path d="M20 11l2.3 5.2 5.7.5-4.3 3.8 1.3 5.6-4.9-3-4.9 3 1.3-5.6-4.3-3.8 5.7-.5z" fill="var(--mark-accent)"/></svg>';
+}
+function renderHeader(){
+  const right = state.loggedIn
+    ? '<span class="role-tag">'+ic('checklistIcon','14px')+' Department Head &middot; '+esc(state.headName)+'</span><button class="btn btn-ghost" data-action="logout">'+ic('logout')+' Log Out</button>'
+    : '';
+  return '<header class="site-header"><div class="wrap">'
+    + '<div class="brand">'+brandMark()+'<span><span class="brand-name">Mabini Assessor Office</span><span class="portal-tag">Department Head Portal</span></span></div>'
+    + '<div class="header-actions">'+right+'</div>'
+    + '</div></header>';
+}
+function renderLogin(){
+  const acct = storeGet('smartAssessHeadAccount', {});
+  return renderHeader()
+  + '<div class="login-shell"><div class="login-card fade-in">'
+    + '<h2>Department Head Log In</h2><p>Internal portal for reports, monitoring, and announcements.</p>'
+    + '<div class="field"><label>Username</label><input id="lg-user" type="text" placeholder="'+esc(acct.username||'')+'"></div>'
+    + '<div class="field"><label>Password</label><input id="lg-pass" type="password"></div>'
+    + (state.loginError ? '<div class="field-error" style="margin-bottom:12px">'+esc(state.loginError)+'</div>' : '')
+    + '<button class="btn btn-primary" style="width:100%" data-action="do-login">'+ic('login')+' Log In</button>'
+    + '<div class="login-note">Demo account: <span class="mono">'+esc(acct.username||'')+'</span> &middot; password <strong>'+esc(acct.password||'')+'</strong></div>'
+  + '</div></div>';
+}
+
+function renderDashboard(){
+  const all = loadRequests();
+  const total = all.length;
+  const docReq = all.filter(function(r){return r.flow==='docreq';}).length;
+  const lt = all.filter(function(r){return r.flow==='landtransfer';}).length;
+  const completeRate = total ? Math.round(all.filter(function(r){return r.requirementComplete;}).length/total*100) : 0;
+  const byBarangay = {}; all.forEach(function(r){ const b=r.barangay||'Unspecified'; byBarangay[b]=(byBarangay[b]||0)+1; });
+  const barangayRanked = Object.keys(byBarangay).map(function(b){return {label:b,count:byBarangay[b]};}).sort(function(a,b){return b.count-a.count;}).slice(0,8);
+  const maxBarangay = barangayRanked.length ? barangayRanked[0].count : 1;
+  const byStatus = {}; STATUS_FLOW.forEach(function(s){ byStatus[s] = all.filter(function(r){return r.status===s;}).length; });
+  const announcements = loadAnnouncements();
+
+  const tabs = '<div class="dash-tabs">'
+    + '<button class="'+(state.tab==='reports'?'active':'')+'" data-tab="reports">'+ic('bar','14px')+' Reports</button>'
+    + '<button class="'+(state.tab==='announcements'?'active':'')+'" data-tab="announcements">'+ic('bell','14px')+' Announcements</button>'
+    + '</div>';
+  let body;
+  if(state.tab==='announcements'){
+    body = '<form id="ann-form" class="compose-form">'
+      + '<div class="field"><label>Title</label><input id="ann-title" type="text" placeholder="e.g. Office schedule update"></div>'
+      + '<div class="field"><label>Message</label><textarea id="ann-body" rows="4" placeholder="Write the announcement for admin and staff..."></textarea></div>'
+      + '<div><button type="submit" class="btn btn-primary">'+ic('send')+' Send Announcement</button></div></form>'
+      + (announcements.length ? announcements.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);}).map(function(a){
+          return '<div class="announcement-card"><h4>'+esc(a.title)+'</h4><div class="ac-meta">'+esc(a.author)+' &middot; '+fmtDateTime(a.date)+'</div><p>'+esc(a.body)+'</p></div>';
+        }).join('') : '<div class="empty-state">No announcements sent yet.</div>');
+  } else {
+    body = '<div class="panel-card"><h3>'+ic('checklistIcon','16px')+' Requests by Status</h3><div class="status-legend">'
+      + STATUS_FLOW.map(function(s){ return statusBadge(s)+'&nbsp;<span class="mono" style="font-size:12px;color:var(--ink-soft)">('+byStatus[s]+')</span>'; }).join('&nbsp;&nbsp;')
+      + '</div></div>'
+      + '<div class="panel-card"><h3>'+ic('pin','16px')+' Barangays with the Most Requests</h3>'
+      + (barangayRanked.length ? barangayRanked.map(function(b){
+          const pct = Math.max(4, Math.round(b.count/maxBarangay*100));
+          return '<div class="bar-row"><span>'+esc(b.label)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div><span class="bar-count">'+b.count+'</span></div>';
+        }).join('') : '<p style="font-size:13px;color:var(--ink-faint)">No submissions yet.</p>') + '</div>'
+      + '<div class="panel-card"><h3>'+ic('clock','16px')+' Recent Activity</h3>'
+      + (all.length ? all.slice(0,6).map(function(r){
+          return '<div class="review-row"><span class="k">'+esc(r.id)+' &middot; '+esc(r.applicant)+'</span><span class="v">'+statusBadge(r.status)+'</span></div>';
+        }).join('') : '<p style="font-size:13px;color:var(--ink-faint)">No submissions yet.</p>') + '</div>';
+  }
+  return renderHeader() + '<div class="admin-shell">'
+    + '<div class="admin-top"><div class="wrap"><h1>Department Head Dashboard</h1><p>Monitor system-wide performance and communicate with staff and admin.</p></div></div>'
+    + '<div class="wrap"><div class="stat-row">'
+      + '<div class="stat-card"><div class="num">'+total+'</div><div class="lbl">Total Requests</div></div>'
+      + '<div class="stat-card"><div class="num">'+docReq+'</div><div class="lbl">Document Requests</div></div>'
+      + '<div class="stat-card"><div class="num">'+lt+'</div><div class="lbl">Land Transfers</div></div>'
+      + '<div class="stat-card"><div class="num">'+completeRate+'%</div><div class="lbl">Requirement-Complete Rate</div></div>'
+      + '</div>' + tabs + body + '</div></div>';
+}
+
+function render(){
+  document.getElementById('app').innerHTML = state.loggedIn ? renderDashboard() : renderLogin();
+  bindEvents();
+}
+function bindEvents(){
+  const root = document.getElementById('app');
+  root.querySelectorAll('[data-action]').forEach(function(el){
+    el.addEventListener('click', function(){
+      const a = el.getAttribute('data-action');
+      if(a==='logout'){ state.loggedIn=false; state.headName=''; render(); }
+      else if(a==='do-login'){
+        const u = (document.getElementById('lg-user').value||'').trim();
+        const p = (document.getElementById('lg-pass').value||'').trim();
+        const acct = storeGet('smartAssessHeadAccount', {});
+        if(u===acct.username && p===acct.password){ state.loggedIn=true; state.headName=acct.name; state.loginError=''; }
+        else state.loginError = 'Incorrect username or password.';
+        render();
+      }
+    });
+  });
+  root.querySelectorAll('[data-tab]').forEach(function(el){ el.addEventListener('click', function(){ state.tab=el.getAttribute('data-tab'); render(); }); });
+  const annForm = root.querySelector('#ann-form');
+  if(annForm){
+    annForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      const title = document.getElementById('ann-title').value.trim();
+      const body = document.getElementById('ann-body').value.trim();
+      if(!title || !body) return;
+      const list = loadAnnouncements();
+      list.push({ id: Date.now(), title:title, body:body, author: state.headName||'Department Head', date:new Date().toISOString() });
+      saveAnnouncements(list);
+      render();
+    });
+  }
+}
+
+seedIfEmpty();
+render();
+})();
+</script>

@@ -1,0 +1,10 @@
+.DS_Store
+
+# Local configuration and secrets
+.env
+*.local.php
+
+# Runtime databases and uploaded files
+smart-assess-app/ai_checker/db.sqlite3
+smart-assess-app/web/uploads/*
+!smart-assess-app/web/uploads/.gitkeep

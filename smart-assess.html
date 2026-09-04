@@ -1,0 +1,927 @@
+<title>SMART ASSESS</title>
+<style>
+  /* ============ Tokens ============ */
+  :root{
+    --paper:#f6f7f3; --surface:#ffffff; --surface-2:#eef2ec;
+    --ink:#152018; --ink-soft:#333c35; --ink-faint:#5b665e;
+    --line:#dde3da; --line-strong:#c4cec0;
+
+    --brand-900:#064e3b; --brand-800:#065f46; --brand-700:#047857;
+    --brand-600:#059669; --brand-500:#10b981; --brand-100:#d1fae5; --brand-50:#ecfdf5;
+    --mark-accent:#ffffff;
+
+    --danger:#a4342b; --danger-bg:#fbeceb;
+    --warn:#8a5a00;   --warn-bg:#fdf3df;
+    --success:#1f6b45; --success-bg:#e6f3ea;
+    --info:#1c5f8a;   --info-bg:#e7f1f8;
+    --neutral:#50595f; --neutral-bg:#eef1f0;
+
+    --shadow-lg:0 24px 48px -28px rgba(12,33,23,.38);
+    --shadow-md:0 12px 28px -16px rgba(12,33,23,.28);
+    --radius-lg:22px; --radius-md:14px; --radius-sm:9px;
+
+    --font-display:'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+    --font-body:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0a130e; --surface:#101c15; --surface-2:#152219;
+      --ink:#edf3ee; --ink-soft:#a9b8ae; --ink-faint:#7c8c81;
+      --line:#213228; --line-strong:#2c4032;
+      --brand-100:#152c1e; --brand-50:#101c15;
+      --danger-bg:#2d1613; --warn-bg:#2c2210; --success-bg:#12291b;
+      --info-bg:#122631; --neutral-bg:#1a221e;
+      --shadow-lg:0 24px 48px -28px rgba(0,0,0,.6); --shadow-md:0 12px 28px -16px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0a130e; --surface:#101c15; --surface-2:#152219;
+    --ink:#edf3ee; --ink-soft:#a9b8ae; --ink-faint:#7c8c81;
+    --line:#213228; --line-strong:#2c4032;
+    --brand-100:#152c1e; --brand-50:#101c15;
+    --danger-bg:#2d1613; --warn-bg:#2c2210; --success-bg:#12291b;
+    --info-bg:#122631; --neutral-bg:#1a221e;
+    --shadow-lg:0 24px 48px -28px rgba(0,0,0,.6); --shadow-md:0 12px 28px -16px rgba(0,0,0,.5);
+  }
+
+  /* ============ Base ============ */
+  *{ box-sizing:border-box; }
+  html{ color-scheme:light dark; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:18px; line-height:1.65; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,h4{ font-family:var(--font-display); font-weight:600; margin:0; text-wrap:balance; color:var(--ink); }
+  p{ margin:0; }
+  a{ color:inherit; }
+  button{ font-family:inherit; }
+  svg{ display:block; }
+  ::selection{ background:var(--brand-500); color:#fff; }
+  *:focus-visible{ outline:3px solid var(--brand-500); outline-offset:3px; border-radius:4px; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; transition-duration:.001ms !important; } }
+
+  /* Every icon gets an explicit default size + flex-centering so it never
+     falls back to undefined/browser-dependent sizing. Contexts that need a
+     different size (buttons, chips, headings, etc.) override width/height
+     on THIS class — never on the inner svg — so specificity always stays
+     predictable (one class = one size, highest-specificity selector wins
+     cleanly instead of a bare `svg` selector fighting `.icon svg`). */
+  .icon{ display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:20px; height:20px; }
+  .icon svg{ width:100%; height:100%; }
+
+  #app{ min-height:100vh; display:flex; flex-direction:column; }
+  .wrap{ width:100%; max-width:1180px; margin:0 auto; padding:0 32px; }
+  @media (max-width:768px){ .wrap{ padding:0 20px; } }
+
+  /* ============ Header ============ */
+  .site-header{ position:sticky; top:0; z-index:40; background:var(--surface); border-bottom:1px solid var(--line); }
+  .site-header .wrap{ display:flex; align-items:center; justify-content:space-between; min-height:88px; padding-top:12px; padding-bottom:12px; gap:16px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; cursor:pointer; background:none; border:none; padding:0; }
+  .brand-mark{ width:42px; height:42px; }
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:22px; color:var(--brand-700); letter-spacing:-.01em; }
+  .header-actions{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+  /* ============ Buttons ============ */
+  /* Two sizes only: primary/hero actions at 52-60px tall, the lighter
+     ghost/link actions at 44-48px — matching the height scale requested,
+     applied consistently instead of ad hoc per button. */
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:10px; font-family:var(--font-body); font-weight:700; font-size:17px; cursor:pointer; border-radius:999px; border:2px solid transparent; padding:15px 26px; min-height:52px; text-decoration:none; line-height:1.2; transition:transform .15s ease, background .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  .btn .icon{ width:18px; height:18px; }
+  .btn-primary{ background:var(--brand-700); color:#fff; box-shadow:var(--shadow-md); }
+  .btn-primary:hover{ background:var(--brand-600); transform:translateY(-1px); }
+  .btn-primary:disabled{ background:var(--line-strong); color:var(--ink-faint); box-shadow:none; cursor:not-allowed; transform:none; }
+  .btn-ghost{ background:transparent; color:var(--ink); border-color:var(--line-strong); min-height:48px; padding:12px 22px; }
+  .btn-ghost:hover{ background:var(--surface-2); }
+  .btn-hero{ background:var(--brand-900); color:#fff; padding:18px 32px; font-size:19px; min-height:60px; }
+  .btn-hero:hover{ background:#043b2c; transform:translateY(-1px); }
+  .btn-hero .icon{ width:20px; height:20px; }
+  .btn-link{ display:inline-flex; align-items:center; gap:8px; background:var(--brand-50); border:2px solid var(--brand-100); padding:13px 20px; border-radius:999px; color:var(--brand-700); font-weight:700; font-size:16px; cursor:pointer; text-decoration:none; min-height:48px; }
+  .btn-link:hover{ background:var(--brand-100); }
+  .btn-link .icon{ width:16px; height:16px; }
+
+  /* ============ Hero ============ */
+  .hero{ position:relative; overflow:hidden; color:#fff;
+    background: radial-gradient(ellipse 900px 500px at 12% -10%, rgba(63,174,116,.45), transparent 60%),
+      linear-gradient(155deg, var(--brand-900) 0%, var(--brand-700) 58%, var(--brand-600) 100%); }
+  .hero-motif{ position:absolute; right:-40px; top:0; bottom:0; width:52%; opacity:.14; pointer-events:none; }
+  .hero-motif svg{ width:100%; height:100%; }
+  .hero-inner{ position:relative; padding:96px 0 88px; max-width:780px; }
+  .eyebrow{ font-size:14px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#c3ecd4; margin-bottom:22px; display:block; }
+  .hero h1{ color:#fff; font-size:clamp(36px,5.4vw,58px); line-height:1.15; letter-spacing:-.01em; margin-bottom:24px; }
+  .hero p.lede{ font-size:20px; line-height:1.6; color:#f1f9f3; max-width:600px; margin-bottom:38px; }
+  @media (max-width:768px){ .hero-inner{ padding:64px 0 56px; } .hero-motif{ width:70%; opacity:.1; } }
+
+  /* ============ Services / cards ============ */
+  .section{ padding:88px 0; }
+  .section-head{ text-align:center; max-width:680px; margin:0 auto 52px; }
+  .section-head h2{ font-size:clamp(28px,3.6vw,36px); margin-bottom:16px; }
+  .section-head p{ color:var(--ink-soft); font-size:18px; }
+
+  .service-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:28px; }
+  @media (max-width:768px){ .service-grid{ grid-template-columns:1fr; } }
+  .service-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); padding:40px 36px; box-shadow:var(--shadow-md); display:flex; flex-direction:column; gap:18px; transition:transform .18s ease, box-shadow .18s ease; }
+  .service-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+  .chip-icon{ width:64px; height:64px; border-radius:16px; background:var(--brand-100); color:var(--brand-700); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .chip-icon .icon{ width:32px; height:32px; }
+  .service-card h3{ font-size:24px; }
+  .service-card p{ color:var(--ink-soft); font-size:17px; line-height:1.6; flex:1; }
+
+  .feature-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:40px; text-align:center; }
+  @media (max-width:768px){ .feature-row{ grid-template-columns:1fr; gap:44px; } }
+  .feature-row .chip-icon{ width:72px; height:72px; margin:0 auto 20px; }
+  .feature-row .chip-icon .icon{ width:36px; height:36px; }
+  .feature-row h4{ font-size:19px; margin-bottom:10px; }
+  .feature-row p{ color:var(--ink-soft); font-size:16px; line-height:1.6; }
+  .section-alt{ background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+
+  /* ============ Footer ============ */
+  .site-footer{ background:var(--brand-900); color:#dcefe3; padding:60px 0 38px; }
+  .footer-grid{ display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:40px; }
+  @media (max-width:768px){ .footer-grid{ grid-template-columns:1fr; gap:32px; } }
+  .footer-grid h5{ color:#fff; font-family:var(--font-body); font-weight:700; font-size:17px; margin-bottom:14px; }
+  .footer-grid p, .footer-grid div{ font-size:16px; line-height:1.75; color:#c2ddcd; }
+  .footer-bottom{ margin-top:48px; padding-top:24px; border-top:1px solid rgba(255,255,255,.15); font-size:14px; color:#a8cbb8; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+
+  /* ============ Wizard shell ============ */
+  .wizard-shell{ flex:1; background:
+      radial-gradient(ellipse 900px 500px at 90% -10%, rgba(63,174,116,.35), transparent 60%),
+      linear-gradient(160deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-600) 100%);
+    padding:48px 20px 64px; position:relative; overflow:hidden;
+  }
+  .wizard-motif{ position:absolute; left:-60px; bottom:-40px; width:340px; opacity:.12; pointer-events:none; }
+  .wizard-col{ max-width:900px; margin:0 auto; position:relative; }
+  .wizard-col.narrow{ max-width:620px; }
+  .wizard-header{ color:#fff; padding:6px 8px 26px; }
+  .wizard-header h1{ color:#fff; font-size:clamp(26px,3.6vw,34px); margin-bottom:8px; }
+  .wizard-header p{ color:#d9ecdf; font-size:14.5px; }
+
+  .stepper{
+    background:var(--surface); border-radius:999px; padding:8px; display:flex; gap:4px;
+    box-shadow:var(--shadow-md); overflow-x:auto; margin-bottom:22px;
+  }
+  .step-pill{
+    flex:1; min-width:150px; display:flex; align-items:center; gap:10px; padding:11px 16px;
+    border-radius:999px; cursor:pointer; border:none; background:transparent; color:var(--ink-faint);
+    font-size:13.5px; font-weight:600; transition:background .15s ease, color .15s ease;
+  }
+  .step-pill.active{ background:var(--brand-50); color:var(--brand-700); }
+  .step-pill.done{ color:var(--brand-600); }
+  .step-pill:disabled{ cursor:default; }
+  .step-num{ width:22px; height:22px; border-radius:50%; border:1.5px solid currentColor; display:flex; align-items:center; justify-content:center; font-size:11.5px; flex-shrink:0; }
+  .step-pill.active .step-num{ background:var(--brand-700); border-color:var(--brand-700); color:#fff; }
+  .step-pill.done .step-num{ background:var(--brand-600); border-color:var(--brand-600); color:#fff; }
+  .step-pill.done .step-num svg{ width:12px; height:12px; }
+  .step-label{ text-align:left; overflow:hidden; text-overflow:ellipsis; }
+
+  .wizard-card{ background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); overflow:hidden; }
+  .wizard-card-head{ padding:28px 32px 4px; }
+  .wizard-card-head h2{ font-size:21px; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .wizard-card-head h2 .icon{ width:21px; height:21px; color:var(--brand-600); }
+  .wizard-card-head p{ color:var(--ink-soft); font-size:13.5px; }
+  .wizard-card-body{ padding:24px 32px 8px; max-height:min(56vh,600px); overflow-y:auto; }
+  @media (max-width:640px){ .wizard-card-body{ max-height:none; } }
+  .wizard-card-foot{ padding:20px 32px 26px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); margin-top:6px; }
+
+  .field-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px 24px; margin-bottom:22px; }
+  @media (max-width:640px){ .field-grid{ grid-template-columns:1fr; } }
+  .field{ display:flex; flex-direction:column; gap:7px; }
+  .field label{ font-size:13px; font-weight:700; color:var(--ink); }
+  .field label .req{ color:var(--danger); margin-left:2px; }
+  .field input, .field select{
+    font-family:inherit; font-size:14.5px; padding:12px 14px; border-radius:var(--radius-sm);
+    border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input::placeholder{ color:var(--ink-faint); }
+  .field input:focus, .field select:focus{ border-color:var(--brand-500); box-shadow:0 0 0 3px var(--brand-100); outline:none; }
+  .field input.invalid, .field select.invalid{ border-color:var(--danger); }
+  .field-error{ font-size:12.5px; color:var(--danger); }
+  .field-hint{ font-size:12px; color:var(--ink-faint); }
+  .section-divider{ display:flex; align-items:center; gap:8px; margin:6px 0 18px; color:var(--brand-600); }
+  .section-divider .icon{ width:15px; height:15px; }
+  .section-divider span{ font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .section-divider::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+  .advisory{ display:flex; gap:10px; background:var(--warn-bg); color:var(--warn); border:1px solid rgba(138,90,0,.25); border-radius:var(--radius-sm); padding:12px 14px; font-size:13px; margin:-6px 0 20px; }
+  .advisory .icon{ width:17px; height:17px; flex-shrink:0; margin-top:1px; }
+
+  /* Owner toggle + uploads */
+  .owner-toggle{ display:flex; align-items:center; gap:12px; margin-bottom:20px; cursor:pointer; user-select:none; }
+  .owner-toggle input{ display:none; }
+  .toggle-dot{ width:22px; height:22px; border-radius:50%; border:1.5px solid var(--line-strong); display:flex; align-items:center; justify-content:center; background:var(--surface); flex-shrink:0; transition:background .15s ease, border-color .15s ease; }
+  /* Sized on .icon (not the inner svg) — matches the pattern every other
+     icon context uses, so this can't lose a specificity fight against the
+     base ".icon svg{width:100%;height:100%}" rule the way ".toggle-dot
+     svg" previously did (that's why the checkmark never showed at 12px). */
+  .toggle-dot .icon{ width:12px; height:12px; color:#fff; opacity:0; transition:opacity .1s ease; }
+  .owner-toggle input:checked + .toggle-dot{ background:var(--ink); border-color:var(--ink); }
+  .owner-toggle input:checked + .toggle-dot .icon{ opacity:1; }
+  .owner-toggle-label{ font-weight:600; font-size:14.5px; }
+
+  .upload-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:8px; }
+  @media (max-width:640px){ .upload-grid{ grid-template-columns:1fr; } }
+  .upload-box{
+    border:1.5px dashed var(--line-strong); border-radius:var(--radius-md); padding:18px;
+    cursor:pointer; background:var(--surface); transition:border-color .15s ease, background .15s ease;
+  }
+  .upload-box:hover{ border-color:var(--brand-500); background:var(--brand-50); }
+  .upload-box.required{ border-color:var(--brand-500); background:var(--brand-50); }
+  .upload-box.invalid{ border-color:var(--danger); }
+  .upload-box.filled{ border-style:solid; border-color:var(--brand-500); background:var(--brand-50); }
+  .upload-head{ display:flex; align-items:center; gap:9px; font-weight:700; font-size:13.5px; margin-bottom:4px; }
+  .upload-head .icon{ width:17px; height:17px; color:var(--brand-600); }
+  .upload-hint{ font-size:12.5px; color:var(--ink-faint); margin-top:2px; }
+  .upload-filename{ font-size:12.5px; color:var(--brand-700); margin-top:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-family:var(--font-mono); }
+  .upload-filename .icon{ width:15px; height:15px; }
+  .upload-remove{ background:none; border:none; color:var(--danger); font-size:11.5px; font-weight:700; cursor:pointer; font-family:var(--font-body); text-decoration:underline; }
+
+  /* Review */
+  .review-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media (max-width:640px){ .review-grid{ grid-template-columns:1fr; } }
+  .review-card{ background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px 20px; }
+  .review-card h3{ font-size:14px; display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .review-card h3 .icon{ width:16px; height:16px; color:var(--brand-600); }
+  .review-row{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .review-row:last-child{ border-bottom:none; }
+  .review-row .k{ color:var(--ink-soft); }
+  .review-row .v{ font-weight:600; text-align:right; }
+
+  .check-banner{ display:flex; align-items:center; gap:12px; border-radius:var(--radius-md); padding:14px 18px; margin-bottom:18px; font-size:13.5px; font-weight:600; }
+  .check-banner.ok{ background:var(--success-bg); color:var(--success); }
+  .check-banner.bad{ background:var(--warn-bg); color:var(--warn); }
+  .check-banner .icon{ width:20px; height:20px; flex-shrink:0; }
+  .check-banner .sub{ font-weight:400; display:block; font-size:12.5px; margin-top:2px; opacity:.9; }
+
+  /* ============ Confirmation ============ */
+  .confirm-shell{ flex:1; display:flex; align-items:center; justify-content:center; padding:60px 20px; background:var(--paper); }
+  .confirm-card{ max-width:540px; width:100%; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:44px 40px; text-align:center; }
+  .confirm-icon{ width:64px; height:64px; border-radius:50%; background:var(--success-bg); color:var(--success); display:flex; align-items:center; justify-content:center; margin:0 auto 22px; }
+  .confirm-icon .icon{ width:30px; height:30px; }
+  .confirm-ref{ font-family:var(--font-mono); font-size:22px; font-weight:600; color:var(--brand-700); background:var(--brand-50); border:1px dashed var(--line-strong); border-radius:var(--radius-sm); padding:14px; margin:20px 0; letter-spacing:.03em; }
+  .confirm-actions{ display:flex; gap:10px; justify-content:center; margin-top:26px; flex-wrap:wrap; }
+
+  /* ============ Track ============ */
+  .track-card{ background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:30px 32px; }
+  .track-form{ display:flex; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+  .track-form input{ flex:1; min-width:200px; font-family:var(--font-mono); font-size:14.5px; padding:12px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+  .track-result{ margin-top:24px; padding-top:22px; border-top:1px solid var(--line); }
+  .timeline{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+  .timeline li{ display:flex; gap:10px; align-items:flex-start; font-size:13px; }
+  .timeline .t-dot{ width:9px; height:9px; border-radius:50%; background:var(--brand-500); margin-top:6px; flex-shrink:0; }
+  .timeline .t-status{ font-weight:700; }
+  .timeline .t-when{ color:var(--ink-faint); font-size:11.5px; font-family:var(--font-mono); }
+  .sms-item{ background:var(--surface-2); border-radius:var(--radius-sm); padding:10px 12px; font-size:12.5px; margin-bottom:8px; }
+  .sms-item .sms-when{ color:var(--ink-faint); font-size:11px; font-family:var(--font-mono); margin-top:4px; }
+  .modal-section-title{ font-size:13px; font-weight:700; margin:20px 0 10px; display:flex; align-items:center; gap:7px; }
+  .modal-section-title .icon{ width:15px; height:15px; color:var(--brand-600); }
+
+  .fade-in{ animation:fadeIn .25s ease both; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================= Icons ======================= */
+function svg(inner, vb){ return '<svg viewBox="'+(vb||"0 0 24 24")+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>'; }
+const ICONS = {
+  doc: svg('<rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>'),
+  swap: svg('<line x1="4" y1="8" x2="20" y2="8"/><polyline points="15 3 20 8 15 13"/><line x1="20" y1="16" x2="4" y2="16"/><polyline points="9 11 4 16 9 21"/>'),
+  shield: svg('<path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/>'),
+  clock: svg('<circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="14"/>'),
+  headset: svg('<path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M20 19v1a3 3 0 0 1-3 3h-3"/>'),
+  pin: svg('<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/>'),
+  user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'),
+  home: svg('<path d="M4 11 12 4l8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9"/>'),
+  id: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M5.5 16c.5-1.8 1.7-2.7 3-2.7s2.5.9 3 2.7"/><line x1="14" y1="9" x2="18" y2="9"/><line x1="14" y1="12" x2="18" y2="12"/><line x1="14" y1="15" x2="17" y2="15"/>'),
+  file: svg('<path d="M7 3h7l4 4v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><polyline points="14 3 14 7 18 7"/><line x1="8.5" y1="12" x2="15.5" y2="12"/><line x1="8.5" y1="15.5" x2="15.5" y2="15.5"/>'),
+  check: svg('<polyline points="5 13 10 18 19 6"/>'),
+  arrowRight: svg('<line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/>'),
+  arrowLeft: svg('<line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 6 4 12 10 18"/>'),
+  search: svg('<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'),
+  alert: svg('<path d="M12 3 22 20H2z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none"/>'),
+  checklistIcon: svg('<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><polyline points="9 13 11 15 15 11"/>'),
+  timer: svg('<circle cx="12" cy="13" r="8"/><line x1="12" y1="13" x2="12" y2="9"/><line x1="12" y1="13" x2="15" y2="14.5"/><line x1="9" y1="2" x2="15" y2="2"/>'),
+  smsIcon: svg('<path d="M4 4h16v12H8l-4 4V4z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="11" x2="13" y2="11"/>'),
+};
+function ic(name, cls){ return '<span class="icon '+(cls||'')+'">'+ICONS[name]+'</span>'; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmtBytes(n){ if(n<1024) return n+' B'; if(n<1024*1024) return (n/1024).toFixed(0)+' KB'; return (n/1024/1024).toFixed(1)+' MB'; }
+function fmtDateTime(iso){ try{ return new Date(iso).toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ return iso; } }
+
+/* ======================= Storage ======================= */
+/* This file (the PUBLIC CLIENT portal) only ever reads/writes
+   'smartAssessRequests' — it has no concept of staff/admin/head accounts,
+   logins, or announcements at all. Those live in the separate internal
+   portal files (smart-assess-staff.html / -admin.html / -head.html),
+   each with their own accounts and their own copy of this same
+   'smartAssessRequests' key. See the note at the end of this file. */
+function storeGet(key, fallback){ try{ const v = localStorage.getItem(key); return v==null ? fallback : JSON.parse(v); }catch(e){ return fallback; } }
+function storeSet(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+function loadRequests(){ return storeGet('smartAssessRequests', []); }
+function saveRequests(list){ storeSet('smartAssessRequests', list); }
+
+function nextRefNo(flow){
+  let n = storeGet('smartAssessRefCounter', 0) + 1;
+  storeSet('smartAssessRefCounter', n);
+  const prefix = flow === 'docreq' ? 'DR' : 'LT';
+  return prefix + '-' + new Date().getFullYear() + '-' + String(n).padStart(5,'0');
+}
+
+/* ======================= Reference data ======================= */
+const DOC_TYPES = [
+  'Certified True Copy of Tax Declaration (CTC-TD)',
+  'Certification of No/With Existing Improvement',
+  'Certification of Property/No Property Holdings',
+  'Certification of No Liens and Encumbrances',
+  'Certification of Assessment'
+];
+const PURPOSES = ['Personal Copy','For Transfer','For Titling','For Building Permit','For Reclassification','Other Legal Requirement'];
+const TRANSFER_TYPES = ['Sale','Donation','Inheritance'];
+const LAND_TRANSFER_DOCS = [
+  { key:'ctcTdOrTitle', label:'Certified True Copy of Tax Declaration or Title' },
+  { key:'notarialDeed', label:'Notarial Deed of Sale or Donation' },
+  { key:'vicinityMap', label:'Vicinity Map' },
+  { key:'certNoImprovement', label:'Certification of No Improvement' },
+  { key:'taxClearance', label:'Tax Clearance' }
+];
+const DOCREQ_STEPS = ['Step 1: Personal','Step 2: Property','Step 3: Uploads','Step 4: Review'];
+const LT_STEPS = ['Step 1: Personal','Step 2: Transfer','Step 3: Documents','Step 4: Review'];
+const STATUS_FLOW = ['Received','Processing','Approved','Rejected','Out for Release'];
+const STATUS_META = {
+  'Received':{ sms:function(id){ return 'SMART ASSESS: Your request '+id+' has been received by the Mabini Assessor\'s Office.'; } },
+  'Processing':{ sms:function(id){ return 'SMART ASSESS: Your request '+id+' is now under review.'; } },
+  'Approved':{ sms:function(id){ return 'SMART ASSESS: Good news! Your request '+id+' has been approved.'; } },
+  'Rejected':{ sms:function(id, missing){ return 'SMART ASSESS: Your request '+id+' needs corrections. Missing/invalid: '+((missing&&missing.length)?missing.join(', '):'see portal for details')+'.'; } },
+  'Out for Release':{ sms:function(id){ return 'SMART ASSESS: Your document for request '+id+' is ready for release at the MAO.'; } }
+};
+
+/* ======================= State ======================= */
+function blankFormData(){
+  return {
+    firstName:'', lastName:'', middleName:'', contact:'', email:'',
+    addressLine:'', province:'Batangas', city:'Mabini', zip:'',
+    documentType:'', transferType:'', purpose:'', arp:'', propertyAddress:'', barangay:'',
+    isOwner:true, files:{}
+  };
+}
+const state = {
+  view:'landing', flow:null, step:1, maxStep:1,
+  formData: blankFormData(), errors:{}, lastSubmission:null,
+  track:{ query:'', result:null, searched:false }
+};
+
+/* ======================= Validation rules ======================= */
+const PH_MOBILE_RE = /^09\d{2}-\d{3}-\d{4}$/;
+const ZIP_RE = /^\d{4}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const VALID_FILE_RE = /^(image\/(jpeg|png|webp)|application\/pdf)$/;
+
+function fileMetaFromFile(f){ return { name:f.name, size:f.size, type:f.type, valid: VALID_FILE_RE.test(f.type) && f.size>0 && f.size < 15*1024*1024 }; }
+
+function validateStep1(fd, errors){
+  if(!fd.firstName.trim()) errors.firstName = 'First name is required.';
+  if(!fd.lastName.trim()) errors.lastName = 'Last name is required.';
+  if(!fd.contact.trim()) errors.contact = 'Contact number is required.';
+  else if(!PH_MOBILE_RE.test(fd.contact.trim())) errors.contact = 'Use format 09XX-XXX-XXXX.';
+  if(!fd.email.trim()) errors.email = 'Email address is required.';
+  else if(!EMAIL_RE.test(fd.email.trim())) errors.email = 'Enter a valid email address.';
+  if(!fd.addressLine.trim()) errors.addressLine = 'House number / street / barangay is required.';
+  if(!fd.province.trim()) errors.province = 'Province is required.';
+  if(!fd.city.trim()) errors.city = 'City/Municipality is required.';
+  if(!fd.zip.trim()) errors.zip = 'Zip code is required.';
+  else if(!ZIP_RE.test(fd.zip.trim())) errors.zip = 'Zip code must be 4 digits.';
+}
+function validateStep2(flow, fd, errors){
+  if(flow==='docreq'){
+    if(!fd.documentType) errors.documentType = 'Please select a document type.';
+    if(fd.documentType && !fd.purpose) errors.purpose = 'Please select a purpose.';
+  } else {
+    if(!fd.transferType) errors.transferType = 'Please select a transfer type.';
+    if(fd.transferType && !fd.purpose) errors.purpose = 'Please select a purpose.';
+  }
+  if(!fd.arp.trim()) errors.arp = 'ARP / Tax Declaration number is required.';
+  if(!fd.propertyAddress.trim()) errors.propertyAddress = 'Property address is required.';
+  if(!fd.barangay.trim()) errors.barangay = 'Barangay is required.';
+}
+function requiredIdKeys(fd){ return fd.isOwner ? ['ownerId'] : ['ownerId','requesterId','authLetter']; }
+function idLabel(flow, key){
+  const map = {
+    docreq:{ ownerId:'Valid Government-Issued ID', requesterId:'Valid ID of Requester', authLetter:'Authorization Letter' },
+    landtransfer:{ ownerId:'Valid ID of Property Owner', requesterId:'Valid ID of Requester', authLetter:'Authorization Letter' }
+  };
+  return map[flow][key];
+}
+function getRequirementChecklist(flow, fd){
+  const items = [];
+  if(flow==='landtransfer'){
+    LAND_TRANSFER_DOCS.forEach(function(d){
+      const f = fd.files[d.key];
+      items.push({ key:d.key, label:d.label, status: !f ? 'missing' : (f.valid ? 'ok' : 'flagged') });
+    });
+  }
+  requiredIdKeys(fd).forEach(function(k){
+    const f = fd.files[k];
+    items.push({ key:k, label:idLabel(flow,k), status: !f ? 'missing' : (f.valid ? 'ok' : 'flagged') });
+  });
+  return items;
+}
+function checklistIsComplete(items){ return items.every(function(i){ return i.status==='ok'; }); }
+function validateUploads(flow, fd, errors){
+  getRequirementChecklist(flow, fd).forEach(function(item){
+    if(item.status==='missing') errors[item.key] = item.label+' upload is required.';
+    else if(item.status==='flagged') errors[item.key] = 'This file is not a valid scan (use JPG, PNG, or PDF).';
+  });
+}
+function getAdvisory(flow, fd){
+  if(flow==='docreq'){
+    if(fd.documentType==='Certification of Property/No Property Holdings' && fd.purpose==='For Building Permit')
+      return 'A holdings certificate confirms land ownership records, not structures. For a building permit, "Certification of No/With Existing Improvement" is usually required instead.';
+    if(fd.documentType==='Certification of No Liens and Encumbrances' && fd.purpose==='For Building Permit')
+      return '"Certification of No Liens and Encumbrances" is typically requested for loans or financing. For a building permit, try "Certification of No/With Existing Improvement" or "Certification of Assessment."';
+  } else {
+    if(fd.transferType==='Inheritance' && fd.purpose && ['For Building Permit','For Reclassification'].indexOf(fd.purpose)>-1)
+      return 'Inheritance transfers are usually filed "For Transfer" or "For Titling." Double-check the purpose you selected.';
+  }
+  return null;
+}
+
+/* ======================= Status / SMS ======================= */
+function pushStatus(record, status){
+  record.status = status;
+  record.timestamps = record.timestamps || {};
+  record.smsLog = record.smsLog || [];
+  const at = new Date().toISOString();
+  record.timestamps[status] = at;
+  const body = STATUS_META[status].sms(record.id, record.missing);
+  record.smsLog.push({ status:status, body:body, at:at });
+}
+
+/* ======================= Navigation helpers ======================= */
+function go(view){ state.view = view; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function startFlow(flow){
+  state.flow = flow; state.view='wizard'; state.step=1; state.maxStep=1;
+  state.formData = blankFormData(); state.errors={};
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function goToServices(){
+  if(state.view!=='landing'){ state.view='landing'; render(); }
+  requestAnimationFrame(function(){ const el = document.getElementById('services'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); });
+}
+function currentStepLabels(){ return state.flow==='docreq' ? DOCREQ_STEPS : LT_STEPS; }
+function goStep(n){ if(n > state.maxStep) return; state.step = n; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function nextStep(){
+  const fd = state.formData; const errors = {};
+  if(state.step===1) validateStep1(fd, errors);
+  else if(state.step===2) validateStep2(state.flow, fd, errors);
+  else if(state.step===3) validateUploads(state.flow, fd, errors);
+  state.errors = errors;
+  if(Object.keys(errors).length){ render(); return; }
+  state.step = Math.min(4, state.step+1);
+  state.maxStep = Math.max(state.maxStep, state.step);
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function prevStep(){
+  if(state.step===1){ go('landing'); return; }
+  state.step -= 1; state.errors={}; render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function submitRequest(){
+  const fd = state.formData; const errors = {};
+  validateStep1(fd, errors); validateStep2(state.flow, fd, errors); validateUploads(state.flow, fd, errors);
+  if(Object.keys(errors).length){
+    state.errors = errors;
+    if(errors.firstName||errors.lastName||errors.contact||errors.email||errors.addressLine||errors.province||errors.city||errors.zip) state.step=1;
+    else if(errors.documentType||errors.transferType||errors.purpose||errors.arp||errors.propertyAddress||errors.barangay) state.step=2;
+    else state.step=3;
+    render(); return;
+  }
+  const checklist = getRequirementChecklist(state.flow, fd);
+  const missing = checklist.filter(function(c){ return c.status!=='ok'; }).map(function(c){ return c.label; });
+  const refNo = nextRefNo(state.flow);
+  const record = {
+    id: refNo, flow: state.flow,
+    applicant: [fd.firstName, fd.middleName, fd.lastName].filter(Boolean).join(' '),
+    contact: fd.contact, email: fd.email,
+    address: fd.addressLine + ', ' + fd.city + ', ' + fd.province + ' ' + fd.zip,
+    docType: state.flow==='docreq' ? fd.documentType : fd.transferType,
+    purpose: fd.purpose, arp: fd.arp, propertyAddress: fd.propertyAddress, barangay: fd.barangay,
+    isOwner: fd.isOwner,
+    files: JSON.parse(JSON.stringify(fd.files)),
+    advisory: getAdvisory(state.flow, fd),
+    requirementComplete: missing.length===0, missing: missing,
+    timestamps:{}, smsLog:[]
+  };
+  pushStatus(record, 'Received');
+  const list = loadRequests(); list.unshift(record); saveRequests(list);
+  state.lastSubmission = record;
+  state.view = 'confirmation';
+  render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function clearFieldError(key){
+  if(state.errors[key]){
+    delete state.errors[key];
+    const inputEl = document.getElementById('f-'+key);
+    if(inputEl) inputEl.classList.remove('invalid');
+    const errEl = document.getElementById('err-'+key);
+    if(errEl) errEl.remove();
+  }
+}
+
+/* ======================= Shared render bits ======================= */
+function brandMark(){
+  return '<svg class="brand-mark" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--brand-700)"/><circle cx="20" cy="20" r="18" fill="none" stroke="var(--mark-accent)" stroke-width="1.4"/><circle cx="20" cy="20" r="13" fill="none" stroke="var(--mark-accent)" stroke-width="1"/><path d="M20 11l2.3 5.2 5.7.5-4.3 3.8 1.3 5.6-4.9-3-4.9 3 1.3-5.6-4.3-3.8 5.7-.5z" fill="var(--mark-accent)"/></svg>';
+}
+function buildingMotif(){
+  return '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet"><g fill="none" stroke="#fff" stroke-width="2">'
+    + '<polygon points="60,110 200,40 340,110" />'
+    + '<rect x="75" y="110" width="250" height="150" />'
+    + '<line x1="60" y1="260" x2="340" y2="260" />'
+    + Array.from({length:7}).map(function(_,i){ const x = 95 + i*35; return '<rect x="'+x+'" y="130" width="14" height="130" />'; }).join('')
+    + '<line x1="55" y1="266" x2="345" y2="266" />'
+    + '</g></svg>';
+}
+/* This is the PUBLIC CLIENT header only — no staff/admin/head login link
+   anywhere, on purpose. That portal is a separate file entirely now. */
+function renderHeader(){
+  return '<header class="site-header"><div class="wrap">'
+    + '<button class="brand" data-nav="landing">'+brandMark()+'<span class="brand-name">Mabini Assessor Office</span></button>'
+    + '<div class="header-actions"><button class="btn btn-ghost" data-nav="track">'+ic('search')+' Track Request</button></div>'
+    + '</div></header>';
+}
+
+/* ---------- Landing ---------- */
+function renderLanding(){
+  return renderHeader()
+  + '<section class="hero"><div class="hero-motif">'+buildingMotif()+'</div><div class="wrap"><div class="hero-inner fade-in">'
+    + '<span class="eyebrow">Smart Assess Public Client Portal</span>'
+    + '<h1>Official Municipal Portal for Property &amp; Land Services</h1>'
+    + '<p class="lede">Digitalizing governance for the citizens of Mabini. Access property assessments, tax declarations, and municipal resources with clarity and integrity.</p>'
+    + '<button class="btn btn-hero" data-action="get-started">Get Started '+ic('arrowRight')+'</button>'
+    + '</div></div></section>'
+
+  + '<section class="section" id="services"><div class="wrap">'
+    + '<div class="section-head"><h2>How Can We Help You?</h2>'
+    + '<p>Choose the service that best matches your needs. We offer two main pathways to access municipal property assessment services:</p></div>'
+    + '<div class="service-grid">'
+      + '<div class="service-card"><div class="chip-icon">'+ic('doc')+'</div>'
+        + '<h3>Start Document Request</h3>'
+        + '<p>Request for Certified True Copies of Tax Declarations, Certifications of Land Holdings, and more.</p>'
+        + '<button class="btn-link" data-action="start-docreq">Begin Application '+ic('arrowRight')+'</button></div>'
+      + '<div class="service-card"><div class="chip-icon">'+ic('swap')+'</div>'
+        + '<h3>Land Transfer</h3>'
+        + '<p>Submit requirements for property transfer, consolidation, or subdivision of land records.</p>'
+        + '<button class="btn-link" data-action="start-landtransfer">Land Transfer '+ic('arrowRight')+'</button></div>'
+    + '</div></div></section>'
+
+  + '<section class="section section-alt"><div class="wrap">'
+    + '<div class="section-head"><h2>Why Choose SMART ASSESS?</h2>'
+    + '<p>Experience the future of municipal services with our digital platform designed for efficiency, transparency, and accessibility.</p></div>'
+    + '<div class="feature-row">'
+      + '<div><div class="chip-icon">'+ic('shield')+'</div><h4>Secure &amp; Reliable</h4><p>Your data is protected with enterprise-grade security. All transactions are encrypted and monitored.</p></div>'
+      + '<div><div class="chip-icon">'+ic('clock')+'</div><h4>Fast Processing</h4><p>Streamlined workflows ensure your requests are processed quickly with real-time status updates.</p></div>'
+      + '<div><div class="chip-icon">'+ic('headset')+'</div><h4>24/7 Support</h4><p>Access our services anytime. Our support team is here to help with any questions or concerns.</p></div>'
+    + '</div></div></section>'
+
+  + '<footer class="site-footer"><div class="wrap"><div class="footer-grid">'
+    + '<div><h5>Mabini Assessor Office</h5><p>Municipal Hall, Poblacion, Mabini, Batangas, Philippines</p></div>'
+    + '<div><h5>Contact</h5><p>Phone: (043) 487-0123<br>Email: assessor@mabini.gov.ph</p></div>'
+    + '<div><h5>Office Hours</h5><p>Monday to Friday<br>8:00 AM &ndash; 5:00 PM</p></div>'
+    + '</div><div class="footer-bottom"><span>&copy; 2026 Mabini Assessor Office. All rights reserved.</span><span>Smart Assess &middot; AI Rule-Based Requirement Checker</span></div></div></footer>';
+}
+
+/* ---------- Wizard ---------- */
+function stepPill(i, label){
+  const isActive = state.step===i, isDone = state.maxStep>i || (state.step>i);
+  const cls = 'step-pill'+(isActive?' active':'')+(isDone?' done':'');
+  const num = isDone ? '<span class="step-num">'+ic('check')+'</span>' : '<span class="step-num">'+i+'</span>';
+  const disabled = i>state.maxStep ? 'disabled' : '';
+  return '<button class="'+cls+'" '+disabled+' data-goto-step="'+i+'"><span class="step-num-wrap">'+num+'</span><span class="step-label">'+esc(label)+'</span></button>';
+}
+function fieldError(key){ return state.errors[key] ? '<div class="field-error" id="err-'+key+'">'+esc(state.errors[key])+'</div>' : ''; }
+function inv(key){ return state.errors[key] ? ' invalid' : ''; }
+
+function renderStep1(){
+  const fd = state.formData;
+  return '<div class="wizard-card-head"><h2>'+ic('user')+' Enter Personal Information</h2><p>Provide applicant details to proceed with '+(state.flow==='docreq'?'document request and land transfer support':'your land transfer request')+'.</p></div>'
+  + '<div class="wizard-card-body">'
+    + '<div class="field-grid">'
+      + '<div class="field"><label>First Name<span class="req">*</span></label><input id="f-firstName" class="'+(inv('firstName')?'invalid':'')+'" type="text" value="'+esc(fd.firstName)+'" data-bind="firstName" placeholder="Juan">' + fieldError('firstName') + '</div>'
+      + '<div class="field"><label>Last Name<span class="req">*</span></label><input id="f-lastName" class="'+(inv('lastName')?'invalid':'')+'" type="text" value="'+esc(fd.lastName)+'" data-bind="lastName" placeholder="Dela Cruz">' + fieldError('lastName') + '</div>'
+      + '<div class="field"><label>Middle Name</label><input id="f-middleName" type="text" value="'+esc(fd.middleName)+'" data-bind="middleName" placeholder="Santos"></div>'
+      + '<div class="field"><label>Contact Number<span class="req">*</span></label><input id="f-contact" class="'+(inv('contact')?'invalid':'')+'" type="text" value="'+esc(fd.contact)+'" data-bind="contact" placeholder="09XX-XXX-XXXX">' + fieldError('contact') + '</div>'
+      + '<div class="field" style="grid-column:1/-1"><label>Email Address<span class="req">*</span></label><input id="f-email" class="'+(inv('email')?'invalid':'')+'" type="text" value="'+esc(fd.email)+'" data-bind="email" placeholder="juan.delacruz@email.com">' + fieldError('email') + '</div>'
+    + '</div>'
+    + '<div class="section-divider">'+ic('pin')+'<span>Address Information</span></div>'
+    + '<div class="field-grid">'
+      + '<div class="field" style="grid-column:1/-1"><label>House No. / Street / Village / Barangay<span class="req">*</span></label><input id="f-addressLine" class="'+(inv('addressLine')?'invalid':'')+'" type="text" value="'+esc(fd.addressLine)+'" data-bind="addressLine" placeholder="123 Rizal St., Brgy. Poblacion">' + fieldError('addressLine') + '</div>'
+      + '<div class="field"><label>Province<span class="req">*</span></label><input id="f-province" class="'+(inv('province')?'invalid':'')+'" type="text" value="'+esc(fd.province)+'" data-bind="province">' + fieldError('province') + '</div>'
+      + '<div class="field"><label>City/Municipality<span class="req">*</span></label><input id="f-city" class="'+(inv('city')?'invalid':'')+'" type="text" value="'+esc(fd.city)+'" data-bind="city">' + fieldError('city') + '</div>'
+      + '<div class="field"><label>Zip Code<span class="req">*</span></label><input id="f-zip" class="'+(inv('zip')?'invalid':'')+'" type="text" value="'+esc(fd.zip)+'" data-bind="zip" placeholder="4202">' + fieldError('zip') + '</div>'
+    + '</div>'
+  + '</div>';
+}
+
+function renderStep2(){
+  const fd = state.formData;
+  const advisory = getAdvisory(state.flow, fd);
+  const barangayField = '<div class="field"><label>Barangay (Property Location)<span class="req">*</span></label><input id="f-barangay" class="'+(inv('barangay')?'invalid':'')+'" type="text" value="'+esc(fd.barangay)+'" data-bind="barangay" placeholder="e.g. Poblacion">' + fieldError('barangay') + '</div>';
+  if(state.flow==='docreq'){
+    return '<div class="wizard-card-head"><h2>'+ic('home')+' Enter Property Information</h2><p>Fill in document and property details. Additional files are required when filing on behalf of the owner.</p></div>'
+    + '<div class="wizard-card-body">'
+      + '<div class="field" style="margin-bottom:20px"><label>Document Type<span class="req">*</span></label>'
+        + '<select id="f-documentType" class="'+(inv('documentType')?'invalid':'')+'" data-bind-select="documentType">'
+          + '<option value="">Select a document type</option>'
+          + DOC_TYPES.map(function(t){ return '<option value="'+esc(t)+'" '+(fd.documentType===t?'selected':'')+'>'+esc(t)+'</option>'; }).join('')
+        + '</select>' + fieldError('documentType') + '</div>'
+      + (fd.documentType ? (
+          '<div class="field" style="margin-bottom:20px"><label>Purpose of the Requested Document<span class="req">*</span></label>'
+          + '<select id="f-purpose" class="'+(inv('purpose')?'invalid':'')+'" data-bind-select="purpose">'
+            + '<option value="">Select a purpose</option>'
+            + PURPOSES.map(function(p){ return '<option value="'+esc(p)+'" '+(fd.purpose===p?'selected':'')+'>'+esc(p)+'</option>'; }).join('')
+          + '</select>' + fieldError('purpose') + '</div>'
+          + (advisory ? '<div class="advisory">'+ic('alert')+'<span>'+esc(advisory)+'</span></div>' : '')
+        ) : '')
+      + '<div class="field-grid">'
+        + '<div class="field"><label>ARP / Tax Declaration Number<span class="req">*</span></label><input id="f-arp" class="'+(inv('arp')?'invalid':'')+'" type="text" value="'+esc(fd.arp)+'" data-bind="arp" placeholder="024-01-0032">' + fieldError('arp') + '</div>'
+        + '<div class="field"><label>Property Address<span class="req">*</span></label><input id="f-propertyAddress" class="'+(inv('propertyAddress')?'invalid':'')+'" type="text" value="'+esc(fd.propertyAddress)+'" data-bind="propertyAddress" placeholder="Brgy. Poblacion, Mabini, Batangas">' + fieldError('propertyAddress') + '</div>'
+        + barangayField
+      + '</div>'
+    + '</div>';
+  }
+  return '<div class="wizard-card-head"><h2>'+ic('home')+' Enter Property &amp; Transfer Details</h2><p>Provide property information and transfer details. Additional files are required when filing on behalf of the owner.</p></div>'
+  + '<div class="wizard-card-body">'
+    + '<div class="field" style="margin-bottom:20px"><label>Type of Transfer<span class="req">*</span></label>'
+      + '<select id="f-transferType" class="'+(inv('transferType')?'invalid':'')+'" data-bind-select="transferType">'
+        + '<option value="">Select transfer type</option>'
+        + TRANSFER_TYPES.map(function(t){ return '<option value="'+esc(t)+'" '+(fd.transferType===t?'selected':'')+'>'+esc(t)+'</option>'; }).join('')
+      + '</select>' + fieldError('transferType') + '</div>'
+    + (fd.transferType ? (
+        '<div class="field" style="margin-bottom:20px"><label>Purpose of the Requested Document<span class="req">*</span></label>'
+        + '<select id="f-purpose" class="'+(inv('purpose')?'invalid':'')+'" data-bind-select="purpose">'
+          + '<option value="">Select a purpose</option>'
+          + PURPOSES.map(function(p){ return '<option value="'+esc(p)+'" '+(fd.purpose===p?'selected':'')+'>'+esc(p)+'</option>'; }).join('')
+        + '</select>' + fieldError('purpose') + '</div>'
+        + (advisory ? '<div class="advisory">'+ic('alert')+'<span>'+esc(advisory)+'</span></div>' : '')
+      ) : '')
+    + '<div class="field-grid">'
+      + '<div class="field"><label>ARP / Tax Declaration Number<span class="req">*</span></label><input id="f-arp" class="'+(inv('arp')?'invalid':'')+'" type="text" value="'+esc(fd.arp)+'" data-bind="arp" placeholder="024-01-0032">' + fieldError('arp') + '</div>'
+      + '<div class="field"><label>Property Address<span class="req">*</span></label><input id="f-propertyAddress" class="'+(inv('propertyAddress')?'invalid':'')+'" type="text" value="'+esc(fd.propertyAddress)+'" data-bind="propertyAddress" placeholder="Brgy. Poblacion, Mabini, Batangas">' + fieldError('propertyAddress') + '</div>'
+      + barangayField
+    + '</div>'
+  + '</div>';
+}
+
+function uploadBox(key, label, fd){
+  const file = fd.files[key];
+  const err = state.errors[key];
+  const cls = 'upload-box'+(file && file.valid?' filled':'')+(err?' invalid':'');
+  const filenameLine = file
+    ? ('<div class="upload-filename">'+ic('file')+esc(file.name)+' &middot; '+fmtBytes(file.size)+(file.valid?'':' &mdash; <span style="color:var(--danger)">invalid format</span>')+' <button type="button" class="upload-remove" data-remove-file="'+key+'">Remove</button></div>')
+    : '<div class="upload-hint">Drop file here or click to browse (JPG, PNG, or PDF)</div>';
+  return '<div class="'+cls+'" data-upload="'+key+'">'
+    + '<input type="file" id="file-'+key+'" hidden data-file-input="'+key+'">'
+    + '<div class="upload-head">'+ic('id')+esc(label)+'</div>'
+    + filenameLine
+    + (err ? '<div class="field-error" id="err-'+key+'">'+esc(err)+'</div>' : '')
+  + '</div>';
+}
+function renderStep3(){
+  const fd = state.formData;
+  const idKeys = requiredIdKeys(fd);
+  let docsBlock = '';
+  if(state.flow==='landtransfer'){
+    docsBlock = '<div class="section-divider">'+ic('doc')+'<span>Required Transfer Documents</span></div>'
+      + '<div class="upload-grid">' + LAND_TRANSFER_DOCS.map(function(d){ return uploadBox(d.key, d.label, fd); }).join('') + '</div>'
+      + '<div class="section-divider">'+ic('id')+'<span>Identity Verification</span></div>';
+  }
+  return '<div class="wizard-card-head"><h2>'+ic('id')+' '+(state.flow==='landtransfer'?'Documents':'Owner &amp; Uploads')+'</h2><p>Upload required documents and IDs based on your ownership status.</p></div>'
+  + '<div class="wizard-card-body">'
+    + '<label class="owner-toggle"><input type="checkbox" id="f-isOwner" '+(fd.isOwner?'checked':'')+'><span class="toggle-dot">'+ic('check')+'</span><span class="owner-toggle-label">I am the registered property owner</span></label>'
+    + docsBlock
+    + '<div class="upload-grid">' + idKeys.map(function(k){ return uploadBox(k, idLabel(state.flow,k), fd); }).join('') + '</div>'
+    + (!fd.isOwner ? '<div class="advisory">'+ic('alert')+'<span>Since you are not the registered owner, our AI rule-based checker requires a Requester ID and a signed Authorization Letter before this request can be processed.</span></div>' : '')
+  + '</div>';
+}
+
+function renderStep4(){
+  const fd = state.formData;
+  const checklist = getRequirementChecklist(state.flow, fd);
+  const complete = checklistIsComplete(checklist);
+  const missing = checklist.filter(function(c){ return c.status!=='ok'; }).map(function(c){ return c.label; });
+  const fullName = [fd.firstName, fd.middleName, fd.lastName].filter(Boolean).join(' ') || '—';
+  const uploadedRows = checklist.map(function(c){
+    const badge = c.status==='ok' ? esc((fd.files[c.key]||{}).name||'') : (c.status==='flagged' ? 'Invalid format' : 'Not uploaded');
+    return '<div class="review-row"><span class="k">'+esc(c.label)+'</span><span class="v">'+badge+'</span></div>';
+  }).join('');
+  const docTypeRow = state.flow==='docreq'
+    ? '<div class="review-row"><span class="k">Selected Document Type</span><span class="v">'+esc(fd.documentType||'—')+'</span></div>'
+    : '<div class="review-row"><span class="k">Type of Transfer</span><span class="v">'+esc(fd.transferType||'—')+'</span></div>';
+  return '<div class="wizard-card-head"><h2>'+ic('checklistIcon')+' Review Your Request</h2><p>Confirm the details below before submitting your request to the Municipal Assessor\'s Office.</p></div>'
+  + '<div class="wizard-card-body">'
+    + '<div class="check-banner '+(complete?'ok':'bad')+'">'+ic(complete?'check':'alert')
+      + '<span>'+(complete ? 'AI Rule-Based Requirement Checker: All requirements met' : 'AI Rule-Based Requirement Checker: '+missing.length+' item(s) need attention')
+      + (complete ? '' : '<span class="sub">Missing/invalid: '+esc(missing.join(', '))+'</span>')
+      + '</span></div>'
+    + '<div class="review-grid">'
+      + '<div class="review-card"><h3>'+ic('user')+' Personal Information</h3>'
+        + '<div class="review-row"><span class="k">Full Name</span><span class="v">'+esc(fullName)+'</span></div>'
+        + '<div class="review-row"><span class="k">Email</span><span class="v">'+esc(fd.email||'—')+'</span></div>'
+        + '<div class="review-row"><span class="k">Address</span><span class="v">'+esc(fd.addressLine)+', '+esc(fd.city)+', '+esc(fd.province)+'</span></div>'
+        + '<div class="review-row"><span class="k">Zip Code</span><span class="v">'+esc(fd.zip||'—')+'</span></div>'
+        + '<div class="review-row"><span class="k">Contact Number</span><span class="v">'+esc(fd.contact||'—')+'</span></div>'
+      + '</div>'
+      + '<div class="review-card"><h3>'+ic('home')+' Property Details</h3>'
+        + '<div class="review-row"><span class="k">ARP / Tax Decl. No.</span><span class="v">'+esc(fd.arp||'—')+'</span></div>'
+        + '<div class="review-row"><span class="k">Property Address</span><span class="v">'+esc(fd.propertyAddress||'—')+'</span></div>'
+        + '<div class="review-row"><span class="k">Barangay</span><span class="v">'+esc(fd.barangay||'—')+'</span></div>'
+        + '<div class="review-row"><span class="k">Ownership Status</span><span class="v">'+(fd.isOwner?'Registered property owner':'Not the registered property owner')+'</span></div>'
+      + '</div>'
+      + '<div class="review-card"><h3>'+ic('doc')+' Document &amp; Ownership</h3>'
+        + docTypeRow
+        + '<div class="review-row"><span class="k">Purpose</span><span class="v">'+esc(fd.purpose||'—')+'</span></div>'
+      + '</div>'
+      + '<div class="review-card"><h3>'+ic('file')+' Uploaded Files</h3>'
+        + uploadedRows
+      + '</div>'
+    + '</div>'
+  + '</div>';
+}
+
+function renderWizard(){
+  const flowTitle = state.flow==='docreq' ? 'Document Request' : 'Land Transfer Request';
+  const flowSub = state.flow==='docreq' ? "Submit certified document requests through the Municipal Assessor's Office portal." : "Submit your land transfer request through the Municipal Assessor's Office portal.";
+  const labels = currentStepLabels();
+  const body = state.step===1?renderStep1():state.step===2?renderStep2():state.step===3?renderStep3():renderStep4();
+  const isLast = state.step===4;
+  return renderHeader()
+    + '<div class="wizard-shell"><div class="wizard-motif">'+buildingMotif()+'</div><div class="wizard-col fade-in">'
+    + '<div class="wizard-header"><h1>'+esc(flowTitle)+'</h1><p>'+esc(flowSub)+'</p></div>'
+    + '<div class="stepper">' + labels.map(function(l,idx){ return stepPill(idx+1, l); }).join('') + '</div>'
+    + '<div class="wizard-card">'
+      + body
+      + '<div class="wizard-card-foot">'
+        + '<button class="btn btn-ghost" data-action="prev-step">'+ic('arrowLeft')+' Back</button>'
+        + (isLast
+            ? '<button class="btn btn-primary" data-action="submit">Submit Request '+ic('arrowRight')+'</button>'
+            : '<button class="btn btn-primary" data-action="next-step">Next '+ic('arrowRight')+'</button>')
+      + '</div>'
+    + '</div>'
+    + '</div></div>';
+}
+
+/* ---------- Confirmation ---------- */
+function renderConfirmation(){
+  const r = state.lastSubmission;
+  if(!r) return renderLanding();
+  return renderHeader()
+  + '<div class="confirm-shell"><div class="confirm-card fade-in">'
+    + '<div class="confirm-icon">'+ic('check')+'</div>'
+    + '<h2>Request Submitted</h2>'
+    + '<p style="color:var(--ink-soft);font-size:14px;margin-top:8px">Your '+(r.flow==='docreq'?'document request':'land transfer request')+' has been received by the Municipal Assessor\'s Office. You will get SMS updates at '+esc(r.contact)+'.</p>'
+    + '<div class="confirm-ref">'+esc(r.id)+'</div>'
+    + '<div class="check-banner '+(r.requirementComplete?'ok':'bad')+'" style="text-align:left">'+ic(r.requirementComplete?'check':'alert')
+      + '<span>'+(r.requirementComplete ? 'All requirement-checker items were satisfied.' : 'Missing/invalid: '+esc(r.missing.join(', '))+'. Bring these to the office or wait for a follow-up SMS.')+'</span></div>'
+    + '<div class="confirm-actions">'
+      + '<button class="btn btn-ghost" onclick="window.print()">Print Confirmation</button>'
+      + '<button class="btn btn-ghost" data-nav="track">'+ic('search')+' Track This Request</button>'
+      + '<button class="btn btn-primary" data-nav="landing">Back to Home</button>'
+    + '</div>'
+  + '</div></div>';
+}
+
+/* ---------- Track ---------- */
+function timelineHtml(record){
+  const entries = STATUS_FLOW.filter(function(s){ return record.timestamps && record.timestamps[s]; })
+    .map(function(s){ return { status:s, at:record.timestamps[s] }; })
+    .sort(function(a,b){ return new Date(a.at)-new Date(b.at); });
+  return '<ul class="timeline">' + entries.map(function(e){
+    return '<li><span class="t-dot"></span><div><div class="t-status">'+esc(e.status)+'</div><div class="t-when">'+fmtDateTime(e.at)+'</div></div></li>';
+  }).join('') + '</ul>';
+}
+function smsLogHtml(record){
+  if(!record.smsLog || !record.smsLog.length) return '<p style="font-size:12.5px;color:var(--ink-faint)">No messages sent yet.</p>';
+  return record.smsLog.slice().reverse().map(function(m){
+    return '<div class="sms-item">'+esc(m.body)+'<div class="sms-when">'+fmtDateTime(m.at)+'</div></div>';
+  }).join('');
+}
+function renderTrack(){
+  const t = state.track;
+  let resultBlock = '';
+  if(t.searched){
+    if(t.result){
+      const r = t.result;
+      resultBlock = '<div class="track-result">'
+        + '<div class="check-banner '+(r.requirementComplete?'ok':'bad')+'">'+ic(r.requirementComplete?'check':'alert')
+          + '<span>Current status: <strong>'+esc(r.status)+'</strong>'
+          + (r.requirementComplete ? '' : '<span class="sub">Missing/invalid: '+esc(r.missing.join(', '))+'</span>')
+          + '</span></div>'
+        + '<div class="review-row"><span class="k">Applicant</span><span class="v">'+esc(r.applicant)+'</span></div>'
+        + '<div class="review-row"><span class="k">Service</span><span class="v">'+(r.flow==='docreq'?'Document Request':'Land Transfer')+' &mdash; '+esc(r.docType)+'</span></div>'
+        + '<div class="modal-section-title">'+ic('timer')+' Status Timeline</div>' + timelineHtml(r)
+        + '<div class="modal-section-title">'+ic('smsIcon')+' SMS Notifications (simulated)</div>' + smsLogHtml(r)
+        + '</div>';
+    } else {
+      resultBlock = '<div class="track-result"><p style="color:var(--ink-soft);font-size:14px">No request found with reference number "'+esc(t.query)+'". Double-check the code from your confirmation screen or SMS.</p></div>';
+    }
+  }
+  return renderHeader()
+  + '<div class="wizard-shell"><div class="wizard-motif">'+buildingMotif()+'</div><div class="wizard-col narrow fade-in">'
+    + '<div class="wizard-header"><h1>Track Your Request</h1><p>Enter your reference number to view live status &mdash; no account needed.</p></div>'
+    + '<div class="track-card">'
+      + '<div class="track-form"><input id="track-input" type="text" placeholder="e.g. DR-2026-00001" value="'+esc(t.query)+'"><button class="btn btn-primary" data-action="track-search">'+ic('search')+' Track</button></div>'
+      + '<p class="field-hint">Reference numbers look like DR-2026-00001 (Document Request) or LT-2026-00001 (Land Transfer).</p>'
+      + resultBlock
+    + '</div>'
+  + '</div></div>';
+}
+
+/* ======================= Root render + events ======================= */
+function render(){
+  const app = document.getElementById('app');
+  let html = '';
+  if(state.view==='landing') html = renderLanding();
+  else if(state.view==='wizard') html = renderWizard();
+  else if(state.view==='confirmation') html = renderConfirmation();
+  else if(state.view==='track') html = renderTrack();
+  app.innerHTML = html;
+  bindEvents(app);
+}
+
+function bindEvents(root){
+  root.querySelectorAll('[data-nav]').forEach(function(el){
+    el.addEventListener('click', function(){ go(el.getAttribute('data-nav')); });
+  });
+  root.querySelectorAll('[data-action]').forEach(function(el){
+    el.addEventListener('click', function(){
+      const a = el.getAttribute('data-action');
+      if(a==='get-started') goToServices();
+      else if(a==='start-docreq') startFlow('docreq');
+      else if(a==='start-landtransfer') startFlow('landtransfer');
+      else if(a==='next-step') nextStep();
+      else if(a==='prev-step') prevStep();
+      else if(a==='submit') submitRequest();
+      else if(a==='track-search'){
+        const q = (document.getElementById('track-input').value||'').trim().toUpperCase();
+        state.track.query = q; state.track.searched = true;
+        state.track.result = loadRequests().find(function(r){ return r.id.toUpperCase()===q; }) || null;
+        render();
+      }
+    });
+  });
+  root.querySelectorAll('[data-goto-step]').forEach(function(el){
+    el.addEventListener('click', function(){ goStep(parseInt(el.getAttribute('data-goto-step'),10)); });
+  });
+
+  root.querySelectorAll('[data-bind]').forEach(function(el){
+    el.addEventListener('input', function(){ state.formData[el.getAttribute('data-bind')] = el.value; clearFieldError(el.getAttribute('data-bind')); });
+  });
+  root.querySelectorAll('[data-bind-select]').forEach(function(el){
+    el.addEventListener('change', function(){
+      const key = el.getAttribute('data-bind-select');
+      state.formData[key] = el.value;
+      if(key==='documentType' || key==='transferType') state.formData.purpose='';
+      delete state.errors[key];
+      render();
+    });
+  });
+  const ownerToggle = root.querySelector('#f-isOwner');
+  if(ownerToggle){
+    ownerToggle.addEventListener('change', function(){ state.formData.isOwner = ownerToggle.checked; state.errors = {}; render(); });
+  }
+  root.querySelectorAll('[data-upload]').forEach(function(box){
+    box.addEventListener('click', function(e){
+      if(e.target.closest('[data-remove-file]')) return;
+      const key = box.getAttribute('data-upload');
+      const input = document.getElementById('file-'+key);
+      if(input) input.click();
+    });
+    box.addEventListener('dragover', function(e){ e.preventDefault(); });
+    box.addEventListener('drop', function(e){
+      e.preventDefault();
+      const key = box.getAttribute('data-upload');
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if(f){ state.formData.files[key] = fileMetaFromFile(f); delete state.errors[key]; render(); }
+    });
+  });
+  root.querySelectorAll('[data-file-input]').forEach(function(input){
+    input.addEventListener('change', function(){
+      const key = input.getAttribute('data-file-input');
+      const f = input.files && input.files[0];
+      if(f){ state.formData.files[key] = fileMetaFromFile(f); delete state.errors[key]; render(); }
+    });
+  });
+  root.querySelectorAll('[data-remove-file]').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      const key = btn.getAttribute('data-remove-file');
+      delete state.formData.files[key];
+      render();
+    });
+  });
+}
+
+render();
+})();
+</script>

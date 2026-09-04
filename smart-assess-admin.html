@@ -1,0 +1,280 @@
+<title>Admin Portal</title>
+<style>
+  :root{
+    --paper:#f6f7f3; --surface:#ffffff; --surface-2:#eef2ec;
+    --ink:#152018; --ink-soft:#333c35; --ink-faint:#5b665e;
+    --line:#dde3da; --line-strong:#c4cec0;
+    --brand-900:#064e3b; --brand-800:#065f46; --brand-700:#047857;
+    --brand-600:#059669; --brand-500:#10b981; --brand-100:#d1fae5; --brand-50:#ecfdf5;
+    --mark-accent:#ffffff;
+    --danger:#a4342b; --danger-bg:#fbeceb;
+    --warn:#8a5a00;   --warn-bg:#fdf3df;
+    --success:#1f6b45; --success-bg:#e6f3ea;
+    --info:#1c5f8a;   --info-bg:#e7f1f8;
+    --neutral:#50595f; --neutral-bg:#eef1f0;
+    --shadow-lg:0 24px 48px -28px rgba(12,33,23,.38);
+    --shadow-md:0 12px 28px -16px rgba(12,33,23,.28);
+    --radius-lg:22px; --radius-md:14px; --radius-sm:9px;
+    --font-display:'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+    --font-body:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0a130e; --surface:#101c15; --surface-2:#152219;
+      --ink:#edf3ee; --ink-soft:#a9b8ae; --ink-faint:#7c8c81;
+      --line:#213228; --line-strong:#2c4032;
+      --brand-100:#152c1e; --brand-50:#101c15;
+      --danger-bg:#2d1613; --warn-bg:#2c2210; --success-bg:#12291b;
+      --info-bg:#122631; --neutral-bg:#1a221e;
+      --shadow-lg:0 24px 48px -28px rgba(0,0,0,.6); --shadow-md:0 12px 28px -16px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0a130e; --surface:#101c15; --surface-2:#152219;
+    --ink:#edf3ee; --ink-soft:#a9b8ae; --ink-faint:#7c8c81;
+    --line:#213228; --line-strong:#2c4032;
+    --brand-100:#152c1e; --brand-50:#101c15;
+    --danger-bg:#2d1613; --warn-bg:#2c2210; --success-bg:#12291b;
+    --info-bg:#122631; --neutral-bg:#1a221e;
+    --shadow-lg:0 24px 48px -28px rgba(0,0,0,.6); --shadow-md:0 12px 28px -16px rgba(0,0,0,.5);
+  }
+  *{ box-sizing:border-box; }
+  html{ color-scheme:light dark; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,h4{ font-family:var(--font-display); font-weight:600; margin:0; color:var(--ink); }
+  p{ margin:0; }
+  a{ color:inherit; }
+  button{ font-family:inherit; }
+  svg{ display:block; }
+  *:focus-visible{ outline:3px solid var(--brand-500); outline-offset:3px; border-radius:4px; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; transition-duration:.001ms !important; } }
+  .icon{ flex-shrink:0; } .icon svg{ width:100%; height:100%; }
+  #app{ min-height:100vh; display:flex; flex-direction:column; }
+  .wrap{ width:100%; max-width:1180px; margin:0 auto; padding:0 32px; }
+  @media (max-width:720px){ .wrap{ padding:0 18px; } }
+
+  .site-header{ position:sticky; top:0; z-index:40; background:var(--brand-900); border-bottom:1px solid var(--brand-800); }
+  .site-header .wrap{ display:flex; align-items:center; justify-content:space-between; min-height:84px; padding-top:12px; padding-bottom:12px; gap:16px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ width:40px; height:40px; }
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:20px; color:#fff; display:block; }
+  .portal-tag{ display:block; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#8fd8ae; margin-top:2px; }
+  .header-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .role-tag{ display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#eafff3; background:rgba(255,255,255,.14); padding:9px 14px; border-radius:999px; white-space:nowrap; }
+
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:var(--font-body); font-weight:700; font-size:14.5px; cursor:pointer; border-radius:999px; border:1.5px solid transparent; padding:11px 20px; text-decoration:none; }
+  .btn-primary{ background:var(--brand-700); color:#fff; box-shadow:var(--shadow-md); }
+  .btn-primary:hover{ background:var(--brand-600); }
+  .btn-ghost{ background:transparent; color:#eafff3; border-color:rgba(255,255,255,.35); }
+  .btn-ghost:hover{ background:rgba(255,255,255,.1); }
+
+  .login-shell{ flex:1; display:flex; align-items:center; justify-content:center; padding:60px 20px;
+    background:radial-gradient(ellipse 900px 500px at 90% -10%, rgba(63,174,116,.35), transparent 60%), linear-gradient(160deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-600) 100%); }
+  .login-card{ max-width:420px; width:100%; background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:38px 36px; }
+  .login-card h2{ font-size:22px; margin-bottom:6px; }
+  .login-card > p{ color:var(--ink-soft); font-size:13.5px; margin-bottom:22px; }
+  .field{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+  .field label{ font-size:13px; font-weight:700; }
+  .field input, .field select{ font-family:inherit; font-size:14.5px; padding:12px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink); }
+  .field input:focus, .field select:focus{ border-color:var(--brand-500); box-shadow:0 0 0 3px var(--brand-100); outline:none; }
+  .field-error{ font-size:12.5px; color:var(--danger); }
+  .login-note{ font-size:12px; color:var(--ink-faint); background:var(--surface-2); border-radius:var(--radius-sm); padding:10px 12px; margin-top:16px; }
+
+  .admin-shell{ flex:1; background:var(--paper); }
+  .admin-top{ background:var(--surface); border-bottom:1px solid var(--line); padding:26px 0; }
+  .admin-top h1{ font-size:24px; }
+  .admin-top p{ color:var(--ink-soft); font-size:13.5px; margin-top:4px; }
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:26px 0; }
+  @media (max-width:800px){ .stat-row{ grid-template-columns:repeat(2,1fr); } }
+  .stat-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px 20px; }
+  .stat-card .num{ font-family:var(--font-mono); font-size:26px; font-weight:600; }
+  .stat-card .lbl{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+  .dash-tabs{ display:flex; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:4px; width:fit-content; margin-bottom:22px; }
+  .dash-tabs button{ border:none; background:none; padding:9px 18px; border-radius:999px; font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; gap:7px; }
+  .dash-tabs button.active{ background:var(--brand-700); color:#fff; }
+  .table-wrap{ overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); margin-bottom:60px; }
+  table{ width:100%; border-collapse:collapse; min-width:640px; }
+  thead th{ text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); padding:13px 16px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  tbody td{ padding:13px 16px; font-size:13.5px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--surface-2); }
+  .mono{ font-family:var(--font-mono); }
+  .badge{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; white-space:nowrap; }
+  .badge.green{ background:var(--success-bg); color:var(--success); }
+  .icon-btn{ background:none; border:1.5px solid var(--line-strong); border-radius:var(--radius-sm); padding:6px 10px; font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:var(--ink); }
+  .empty-state{ padding:60px 20px; text-align:center; color:var(--ink-faint); font-size:13.5px; }
+  .announcement-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px 18px; margin-bottom:12px; }
+  .announcement-card h4{ font-size:14.5px; margin-bottom:4px; }
+  .announcement-card .ac-meta{ font-size:11.5px; color:var(--ink-faint); margin-bottom:8px; }
+  .announcement-card p{ font-size:13.5px; color:var(--ink-soft); }
+  .inline-add{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px 18px; margin-bottom:18px; }
+  .inline-add .field{ min-width:150px; flex:1; margin-bottom:0; }
+  .flash{ border-radius:var(--radius-sm); padding:12px 16px; margin-bottom:18px; font-size:13.5px; background:var(--success-bg); color:var(--success); }
+  .fade-in{ animation:fadeIn .25s ease both; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ADMIN-ONLY internal portal — separate file/origin from the client site
+   and from the Staff / Department Head portals. One seeded Admin account. */
+
+function svg(inner){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>'; }
+const ICONS = {
+  users: svg('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17.5" cy="9" r="2.6"/><path d="M15 14.2c2.6.3 4.5 2.4 4.5 5.8"/>'),
+  bell: svg('<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/>'),
+  login: svg('<path d="M13 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/><polyline points="10 8 15 12 10 16"/><line x1="15" y1="12" x2="3" y2="12"/>'),
+  logout: svg('<path d="M11 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"/><polyline points="14 16 19 12 14 8"/><line x1="19" y1="12" x2="7" y2="12"/>'),
+  check: svg('<polyline points="5 13 10 18 19 6"/>'),
+};
+function ic(name, size){ return '<span class="icon" style="width:'+(size||'17px')+';height:'+(size||'17px')+'">'+ICONS[name]+'</span>'; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fmtDateTime(iso){ try{ return new Date(iso).toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ return iso; } }
+function storeGet(key, fallback){ try{ const v = localStorage.getItem(key); return v==null ? fallback : JSON.parse(v); }catch(e){ return fallback; } }
+function storeSet(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+function loadAccounts(){ return storeGet('smartAssessAccounts', []); }
+function saveAccounts(list){ storeSet('smartAssessAccounts', list); }
+function loadAnnouncements(){ return storeGet('smartAssessAnnouncements', []); }
+
+function seedIfEmpty(){
+  if(!storeGet('smartAssessAdminAccount', null)){
+    storeSet('smartAssessAdminAccount', { name:'Maricar D. Santos', username:'maricar.admin', password:'Passw0rd!' });
+  }
+  if(!loadAccounts().length){
+    saveAccounts([
+      { id:1, name:'Maricar D. Santos', username:'maricar.admin', role:'admin', status:'Active' },
+      { id:2, name:'Jessica P. Villanueva', username:'jessica.staff', role:'staff', status:'Active' },
+      { id:3, name:'Rodel H. Ortega', username:'rodel.head', role:'head', status:'Active' }
+    ]);
+  }
+  if(!loadAnnouncements().length){
+    storeSet('smartAssessAnnouncements', [
+      { id:1, title:'Office schedule for Rizal Day', body:'The MAO will be closed on December 30. Document release for approved requests will resume the next business day.', author:'Rodel H. Ortega', date:new Date(Date.now()-3*864e5).toISOString() },
+      { id:2, title:'Reminder: verify scanned uploads', body:'Please confirm scans are legible before approving. Blurry or cropped IDs should be flagged for resubmission.', author:'Rodel H. Ortega', date:new Date(Date.now()-1*864e5).toISOString() }
+    ]);
+  }
+}
+
+const state = { loggedIn:false, adminName:'', tab:'accounts', loginError:'' };
+const roleLabel = { admin:'Admin', staff:"Assessor's Staff", head:'Department Head' };
+
+function brandMark(){
+  return '<svg class="brand-mark" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--brand-700)"/><circle cx="20" cy="20" r="18" fill="none" stroke="var(--mark-accent)" stroke-width="1.4"/><circle cx="20" cy="20" r="13" fill="none" stroke="var(--mark-accent)" stroke-width="1"/><path d="M20 11l2.3 5.2 5.7.5-4.3 3.8 1.3 5.6-4.9-3-4.9 3 1.3-5.6-4.3-3.8 5.7-.5z" fill="var(--mark-accent)"/></svg>';
+}
+function renderHeader(){
+  const right = state.loggedIn
+    ? '<span class="role-tag">'+ic('users','14px')+' Admin &middot; '+esc(state.adminName)+'</span><button class="btn btn-ghost" data-action="logout">'+ic('logout')+' Log Out</button>'
+    : '';
+  return '<header class="site-header"><div class="wrap">'
+    + '<div class="brand">'+brandMark()+'<span><span class="brand-name">Mabini Assessor Office</span><span class="portal-tag">Admin Portal</span></span></div>'
+    + '<div class="header-actions">'+right+'</div>'
+    + '</div></header>';
+}
+function renderLogin(){
+  const acct = storeGet('smartAssessAdminAccount', {});
+  return renderHeader()
+  + '<div class="login-shell"><div class="login-card fade-in">'
+    + '<h2>Admin Log In</h2><p>Internal portal for managing accounts, roles, and system settings.</p>'
+    + '<div class="field"><label>Username</label><input id="lg-user" type="text" placeholder="'+esc(acct.username||'')+'"></div>'
+    + '<div class="field"><label>Password</label><input id="lg-pass" type="password"></div>'
+    + (state.loginError ? '<div class="field-error" style="margin-bottom:12px">'+esc(state.loginError)+'</div>' : '')
+    + '<button class="btn btn-primary" style="width:100%" data-action="do-login">'+ic('login')+' Log In</button>'
+    + '<div class="login-note">Demo account: <span class="mono">'+esc(acct.username||'')+'</span> &middot; password <strong>'+esc(acct.password||'')+'</strong></div>'
+  + '</div></div>';
+}
+
+function renderDashboard(){
+  const accounts = loadAccounts();
+  const announcements = loadAnnouncements();
+  const tabs = '<div class="dash-tabs">'
+    + '<button class="'+(state.tab==='accounts'?'active':'')+'" data-tab="accounts">'+ic('users','14px')+' Accounts</button>'
+    + '<button class="'+(state.tab==='announcements'?'active':'')+'" data-tab="announcements">'+ic('bell','14px')+' Announcements</button>'
+    + '</div>';
+  let body;
+  if(state.tab==='announcements'){
+    body = announcements.length ? announcements.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);}).map(function(a){
+      return '<div class="announcement-card"><h4>'+esc(a.title)+'</h4><div class="ac-meta">'+esc(a.author)+' &middot; '+fmtDateTime(a.date)+'</div><p>'+esc(a.body)+'</p></div>';
+    }).join('') : '<div class="empty-state">No announcements yet.</div>';
+  } else {
+    const rows = accounts.map(function(a){
+      return '<tr><td>'+esc(a.name)+'</td><td class="mono">'+esc(a.username)+'</td>'
+        + '<td><select class="field" style="padding:6px 10px;font-size:12.5px" data-account-role="'+a.id+'"><option value="staff" '+(a.role==='staff'?'selected':'')+'>Assessor\'s Staff</option><option value="admin" '+(a.role==='admin'?'selected':'')+'>Admin</option><option value="head" '+(a.role==='head'?'selected':'')+'>Department Head</option></select></td>'
+        + '<td><select class="field" style="padding:6px 10px;font-size:12.5px" data-account-status="'+a.id+'"><option value="Active" '+(a.status==='Active'?'selected':'')+'>Active</option><option value="Inactive" '+(a.status==='Inactive'?'selected':'')+'>Inactive</option></select></td></tr>';
+    }).join('');
+    body = '<form id="add-account-form" class="inline-add">'
+      + '<div class="field"><label>Full Name</label><input id="new-name" type="text" placeholder="Full name"></div>'
+      + '<div class="field"><label>Username</label><input id="new-user" type="text" placeholder="username"></div>'
+      + '<div class="field"><label>Role</label><select id="new-role"><option value="staff">Assessor\'s Staff</option><option value="admin">Admin</option><option value="head">Department Head</option></select></div>'
+      + '<button type="submit" class="btn btn-primary">'+ic('users')+' Add Account</button></form>'
+      + '<div class="table-wrap"><table><thead><tr><th>Name</th><th>Username</th><th>Role (Level of Access)</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+  return renderHeader() + '<div class="admin-shell">'
+    + '<div class="admin-top"><div class="wrap"><h1>Admin Dashboard</h1><p>Manage registered accounts and their level of access across the office.</p></div></div>'
+    + '<div class="wrap"><div class="stat-row">'
+      + '<div class="stat-card"><div class="num">'+accounts.length+'</div><div class="lbl">Registered Accounts</div></div>'
+      + '<div class="stat-card"><div class="num">'+accounts.filter(function(a){return a.status==='Active';}).length+'</div><div class="lbl">Active</div></div>'
+      + '<div class="stat-card"><div class="num">'+accounts.filter(function(a){return a.role==='staff';}).length+'</div><div class="lbl">Assessor\'s Staff</div></div>'
+      + '<div class="stat-card"><div class="num">'+announcements.length+'</div><div class="lbl">Announcements Received</div></div>'
+      + '</div>' + tabs + body + '</div></div>';
+}
+
+function render(){
+  document.getElementById('app').innerHTML = state.loggedIn ? renderDashboard() : renderLogin();
+  bindEvents();
+}
+function bindEvents(){
+  const root = document.getElementById('app');
+  root.querySelectorAll('[data-action]').forEach(function(el){
+    el.addEventListener('click', function(){
+      const a = el.getAttribute('data-action');
+      if(a==='logout'){ state.loggedIn=false; state.adminName=''; render(); }
+      else if(a==='do-login'){
+        const u = (document.getElementById('lg-user').value||'').trim();
+        const p = (document.getElementById('lg-pass').value||'').trim();
+        const acct = storeGet('smartAssessAdminAccount', {});
+        if(u===acct.username && p===acct.password){ state.loggedIn=true; state.adminName=acct.name; state.loginError=''; }
+        else state.loginError = 'Incorrect username or password.';
+        render();
+      }
+    });
+  });
+  root.querySelectorAll('[data-tab]').forEach(function(el){ el.addEventListener('click', function(){ state.tab=el.getAttribute('data-tab'); render(); }); });
+  const addForm = root.querySelector('#add-account-form');
+  if(addForm){
+    addForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      const name = document.getElementById('new-name').value.trim();
+      const username = document.getElementById('new-user').value.trim();
+      const role = document.getElementById('new-role').value;
+      if(!name || !username) return;
+      const accounts = loadAccounts();
+      accounts.push({ id: Date.now(), name:name, username:username, role:role, status:'Active' });
+      saveAccounts(accounts);
+      render();
+    });
+  }
+  root.querySelectorAll('[data-account-role]').forEach(function(el){
+    el.addEventListener('change', function(){
+      const id = parseFloat(el.getAttribute('data-account-role'));
+      const accounts = loadAccounts(); const acc = accounts.find(function(a){return a.id===id;});
+      if(acc){ acc.role = el.value; saveAccounts(accounts); }
+    });
+  });
+  root.querySelectorAll('[data-account-status]').forEach(function(el){
+    el.addEventListener('change', function(){
+      const id = parseFloat(el.getAttribute('data-account-status'));
+      const accounts = loadAccounts(); const acc = accounts.find(function(a){return a.id===id;});
+      if(acc){ acc.status = el.value; saveAccounts(accounts); }
+    });
+  });
+}
+
+seedIfEmpty();
+render();
+})();
+</script>
